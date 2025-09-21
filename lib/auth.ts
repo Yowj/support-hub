@@ -1,18 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
+import type { AuthUser } from "@/types";
 
-export interface UserProfile {
-  id: string;
-  role: "customer" | "agent" | "admin";
-  display_name: string | null;
-  avatar_url: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export async function getUserProfile(): Promise<{
-  user: any;
-  profile: UserProfile | null;
-}> {
+export async function getUserProfile(): Promise<AuthUser> {
   const supabase = await createClient();
 
   const {

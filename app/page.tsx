@@ -6,6 +6,10 @@ import { redirect } from "next/navigation";
 export default async function Home() {
   const { user, profile } = await getUserProfile();
 
+  if (!user) {
+    return redirect("/login");
+  }
+
   if (!profile) {
     await ensureUserProfile(user.id, user.email || "");
     return redirect("/");
@@ -21,7 +25,9 @@ export default async function Home() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Customer Support</h1>
-            <p className="text-muted-foreground">Welcome back, {profile.display_name || user.email}</p>
+            <p className="text-muted-foreground">
+              Welcome back, {profile.display_name || user.email}
+            </p>
           </div>
           <AuthButton />
         </div>

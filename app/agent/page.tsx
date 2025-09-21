@@ -6,6 +6,9 @@ import { redirect } from "next/navigation";
 export default async function AgentPage() {
   const { user, profile } = await getUserProfile();
 
+  if (!user) {
+    return redirect("/login");
+  }
   if (!profile) {
     await ensureUserProfile(user.id, user.email || "");
     return redirect("/agent");

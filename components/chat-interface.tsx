@@ -66,7 +66,7 @@ export default function ChatInterface({ ticketId, userId, userRole, onClose }: C
         setTicket(ticketResponse.data);
         setMessages(messagesResponse.data || []);
         setError(null);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error fetching ticket data:", error);
         setError("Failed to load chat. Please try refreshing the page.");
       } finally {
@@ -116,7 +116,7 @@ export default function ChatInterface({ ticketId, userId, userRole, onClose }: C
       if (error) throw error;
       setNewMessage("");
       setError(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending message:", error);
       setError("Failed to send message. Please try again.");
     } finally {

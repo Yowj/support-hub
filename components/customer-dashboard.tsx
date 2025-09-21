@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,26 @@ export default function CustomerDashboard({ user }: CustomerDashboardProps) {
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
+  // Use useCallback to memoize the fetchTickets function
+  const fetchTickets = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("support_tickets")
+        .select("*")
+        .eq("customer_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setTickets(data || []);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+      setError("Failed to load tickets. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user.id, supabase]);
+
   useEffect(() => {
     fetchTickets();
 
@@ -55,26 +75,7 @@ export default function CustomerDashboard({ user }: CustomerDashboardProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user.id]);
-
-  const fetchTickets = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("support_tickets")
-        .select("*")
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setTickets(data || []);
-      setError(null);
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-      setError("Failed to load tickets. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [fetchTickets, user.id, supabase]);
 
   const handleTicketCreated = (ticketId: string) => {
     setShowNewTicketForm(false);
@@ -176,7 +177,7 @@ export default function CustomerDashboard({ user }: CustomerDashboardProps) {
           <CardHeader>
             <CardTitle>No Support Tickets</CardTitle>
             <CardDescription>
-              You haven&apos;t created any support tickets yet. Click &ldquo;Create New Ticket&ldquo; to get started.
+              You haven&apos;t created any support tickets yet. Click &quot;Create New Ticket&quot; to get started.
             </CardDescription>
           </CardHeader>
         </Card>

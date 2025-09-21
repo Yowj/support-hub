@@ -65,8 +65,8 @@ export default function NewTicketForm({ userId, onTicketCreated }: NewTicketForm
       setSubject("");
       setMessage("");
       onTicketCreated(ticket.id);
-    } catch (err: any) {
-      setError(err.message || "Failed to create ticket");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to create ticket");
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +77,7 @@ export default function NewTicketForm({ userId, onTicketCreated }: NewTicketForm
       <CardHeader>
         <CardTitle>Create New Support Ticket</CardTitle>
         <CardDescription>
-          Describe your issue and we'll get back to you as soon as possible.
+          Describe your issue and we&apos;ll get back to you as soon as possible.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -99,7 +99,7 @@ export default function NewTicketForm({ userId, onTicketCreated }: NewTicketForm
             <Select
               id="priority"
               value={priority}
-              onChange={(e) => setPriority(e.target.value as any)}
+              onChange={(e) => setPriority(e.target.value as "low" | "medium" | "high" | "urgent")}
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
