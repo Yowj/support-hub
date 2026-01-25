@@ -33,7 +33,7 @@ export default function LoginForm() {
       setError(error.message);
       setIsLoading(false);
     } else {
-      router.replace("/");
+      router.replace("/dashboard");
       return;
     }
   };
@@ -70,7 +70,7 @@ export default function LoginForm() {
         setError("Account created but profile setup failed. Please contact support.");
         setIsLoading(false);
       } else {
-        router.replace("/");
+        router.replace("/dashboard");
         return;
       }
     }
