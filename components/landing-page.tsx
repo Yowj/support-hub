@@ -12,7 +12,6 @@ import {
   Users,
   BarChart3,
   ArrowRight,
-  CheckCircle2,
   Star,
   Sparkles,
 } from "lucide-react";
@@ -31,26 +30,6 @@ export function LandingPage() {
               <span className="text-lg font-semibold tracking-tight">
                 SupportHub
               </span>
-            </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a
-                href="#features"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Features
-              </a>
-              <a
-                href="#testimonials"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Testimonials
-              </a>
-              <a
-                href="#pricing"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Pricing
-              </a>
             </div>
             <div className="flex items-center gap-3">
               <ModeToggle />
@@ -320,9 +299,9 @@ export function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-24 lg:py-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto text-center mb-16">
+      <section id="testimonials" className="py-24 lg:py-32 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 mb-16">
+          <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
               Loved by support teams
               <br />
@@ -332,9 +311,60 @@ export function LandingPage() {
               See what our customers have to say about their experience.
             </p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Marquee container */}
+        <div className="relative">
+          {/* Gradient fade left */}
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          {/* Gradient fade right */}
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+
+          <div className="flex gap-6 animate-marquee">
             {[
+              {
+                quote:
+                  "SupportHub transformed how we handle customer inquiries. Our response time dropped from hours to minutes.",
+                author: "Sarah Chen",
+                role: "Head of Support, TechFlow",
+                avatar: "SC",
+              },
+              {
+                quote:
+                  "The AI features are incredible. It handles 60% of our tickets automatically, letting our team focus on complex issues.",
+                author: "Marcus Johnson",
+                role: "CTO, StartupXYZ",
+                avatar: "MJ",
+              },
+              {
+                quote:
+                  "Finally, a support tool that's actually easy to use. Our team was up and running in less than a day.",
+                author: "Emily Rodriguez",
+                role: "Operations Manager, CloudScale",
+                avatar: "ER",
+              },
+              {
+                quote:
+                  "The analytics dashboard gives us insights we never had before. We can actually measure and improve our support.",
+                author: "David Kim",
+                role: "VP Customer Success, DataDrive",
+                avatar: "DK",
+              },
+              {
+                quote:
+                  "Customer satisfaction scores went up 40% after switching to SupportHub. The difference is night and day.",
+                author: "Lisa Thompson",
+                role: "Support Lead, FinanceApp",
+                avatar: "LT",
+              },
+              {
+                quote:
+                  "The best investment we made this year. ROI was evident within the first month of using SupportHub.",
+                author: "Alex Patel",
+                role: "CEO, GrowthCo",
+                avatar: "AP",
+              },
+              // Duplicate for seamless loop
               {
                 quote:
                   "SupportHub transformed how we handle customer inquiries. Our response time dropped from hours to minutes.",
@@ -380,7 +410,7 @@ export function LandingPage() {
             ].map((testimonial, index) => (
               <div
                 key={index}
-                className="p-6 rounded-2xl border border-border/50 bg-card"
+                className="flex-shrink-0 w-[350px] p-6 rounded-2xl border border-border/50 bg-card"
               >
                 <div className="flex gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -390,7 +420,7 @@ export function LandingPage() {
                     />
                   ))}
                 </div>
-                <p className="text-foreground mb-6">"{testimonial.quote}"</p>
+                <p className="text-foreground mb-6">&quot;{testimonial.quote}&quot;</p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
                     {testimonial.avatar}
@@ -404,152 +434,6 @@ export function LandingPage() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="py-24 lg:py-32 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Start free, upgrade when you need to. No hidden fees.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Starter */}
-            <div className="p-8 rounded-2xl border border-border/50 bg-card">
-              <h3 className="text-lg font-semibold mb-2">Starter</h3>
-              <p className="text-sm text-muted-foreground mb-6">
-                Perfect for small teams
-              </p>
-              <div className="mb-6">
-                <span className="text-4xl font-bold">$0</span>
-                <span className="text-muted-foreground">/month</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Up to 3 team members",
-                  "100 tickets/month",
-                  "Email support",
-                  "Basic analytics",
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-primary" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/login">
-                <Button variant="outline" className="w-full">
-                  Get started
-                </Button>
-              </Link>
-            </div>
-
-            {/* Pro */}
-            <div className="p-8 rounded-2xl border-2 border-primary bg-card relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full">
-                Most popular
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Pro</h3>
-              <p className="text-sm text-muted-foreground mb-6">
-                For growing businesses
-              </p>
-              <div className="mb-6">
-                <span className="text-4xl font-bold">$49</span>
-                <span className="text-muted-foreground">/month</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Up to 10 team members",
-                  "Unlimited tickets",
-                  "Priority support",
-                  "Advanced analytics",
-                  "AI-powered responses",
-                  "Custom workflows",
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-primary" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/login">
-                <Button className="w-full">Get started</Button>
-              </Link>
-            </div>
-
-            {/* Enterprise */}
-            <div className="p-8 rounded-2xl border border-border/50 bg-card">
-              <h3 className="text-lg font-semibold mb-2">Enterprise</h3>
-              <p className="text-sm text-muted-foreground mb-6">
-                For large organizations
-              </p>
-              <div className="mb-6">
-                <span className="text-4xl font-bold">Custom</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Unlimited team members",
-                  "Unlimited tickets",
-                  "Dedicated support",
-                  "Custom integrations",
-                  "SLA guarantees",
-                  "On-premise option",
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-primary" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="outline" className="w-full">
-                Contact sales
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 lg:py-32">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-foreground text-background p-12 lg:p-20">
-            <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground to-foreground/80" />
-            <div className="absolute top-0 right-0 w-96 h-96 bg-background/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-background/5 rounded-full blur-3xl" />
-
-            <div className="relative z-10 max-w-2xl mx-auto text-center">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
-                Ready to transform your customer support?
-              </h2>
-              <p className="text-lg text-background/70 mb-10">
-                Join thousands of companies already using SupportHub to deliver
-                exceptional customer experiences.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/login">
-                  <Button
-                    size="lg"
-                    className="h-12 px-8 text-base bg-background text-foreground hover:bg-background/90"
-                  >
-                    Start free trial
-                  </Button>
-                </Link>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-12 px-8 text-base border-background/20 text-background hover:bg-background/10"
-                >
-                  Schedule demo
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -576,13 +460,8 @@ export function LandingPage() {
               <h4 className="font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
+                  <a href="#features" className="hover:text-foreground transition-colors">
                     Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
-                    Pricing
                   </a>
                 </li>
                 <li>
