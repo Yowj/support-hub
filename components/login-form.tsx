@@ -33,7 +33,7 @@ export default function LoginForm() {
       setError(error.message);
       setIsLoading(false);
     } else {
-      router.replace("/dashboard");
+      window.location.href = "/dashboard";
       return;
     }
   };
@@ -58,21 +58,11 @@ export default function LoginForm() {
     if (error) {
       setError(error.message);
       setIsLoading(false);
+    } else if (data.session) {
+      router.push("/dashboard");
     } else if (data.user) {
-      const { error: profileError } = await supabase.from("user_profiles").insert([
-        {
-          id: data.user.id,
-          display_name: email.split("@")[0],
-        },
-      ]);
-
-      if (profileError) {
-        setError("Account created but profile setup failed. Please contact support.");
-        setIsLoading(false);
-      } else {
-        router.replace("/dashboard");
-        return;
-      }
+      setError("Check your email to confirm your account!");
+      setIsLoading(false);
     }
   };
 
@@ -80,9 +70,7 @@ export default function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Customer Support Portal
-          </CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Customer Support Portal</CardTitle>
           <CardDescription className="text-center">
             {isSignUp ? "Create your account to get started" : "Sign in to your account"}
           </CardDescription>
@@ -102,7 +90,7 @@ export default function LoginForm() {
               variant={isSignUp ? "default" : "outline"}
               onClick={() => setIsSignUp(true)}
               className="flex-1"
-              disabled = {isLoading}
+              disabled={isLoading}
             >
               Sign Up
             </Button>
@@ -148,11 +136,7 @@ export default function LoginForm() {
             )}
 
             {error && (
-              <div
-                className={`text-sm ${
-                  error.includes("Check your email") ? "text-green-600" : "text-destructive"
-                }`}
-              >
+              <div className={`text-sm ${error.includes("Check your email") ? "text-green-600" : "text-destructive"}`}>
                 {error}
               </div>
             )}
@@ -168,8 +152,10 @@ export default function LoginForm() {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Loading...
                 </>
+              ) : isSignUp ? (
+                "Create Account"
               ) : (
-                isSignUp ? "Create Account" : "Sign In"
+                "Sign In"
               )}
             </Button>
           </form>

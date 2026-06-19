@@ -71,8 +71,7 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error fetching tickets:", error);
-        // You can add toast notification here
+        console.error("Error fetching tickets:", error.message, error.code, error.details, error.hint);
         return;
       }
 

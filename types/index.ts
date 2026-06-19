@@ -12,6 +12,7 @@ export interface UserProfile {
 export interface SupportTicket {
   id: string;
   customer_id: string;
+  agent_id: string | null;
   subject: string;
   priority: "low" | "medium" | "high" | "urgent";
   status: "open" | "in_progress" | "resolved" | "closed";
@@ -23,9 +24,11 @@ export interface ChatMessage {
   id: string;
   ticket_id: string;
   sender_id: string;
-  sender_type: "customer" | "agent";
+  sender_type: "customer" | "agent" | "system";
   message: string;
   timestamp: string;
+  read_at: string | null;
+  message_type: "text" | "file" | "image" | "system";
 }
 
 export interface AuthUser {

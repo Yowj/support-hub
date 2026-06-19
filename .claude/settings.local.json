@@ -3,7 +3,10 @@
     "allow": [
       "Bash(mkdir:*)",
       "Bash(npx tsc:*)",
-      "WebSearch"
+      "WebSearch",
+      "Skill(code-review)",
+      "Skill(code-review:*)",
+      "Bash(grep -E \"\\\\.tsx$\")"
     ],
     "deny": [],
     "ask": []
