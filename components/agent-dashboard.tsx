@@ -3,10 +3,17 @@
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import ChatInterface from "./chat-interface";
 import type { User } from "@supabase/supabase-js";
+import {
+  Search,
+  Inbox,
+  UserCheck,
+  Users,
+  AlertTriangle,
+  MessageSquare,
+  Loader2,
+} from "lucide-react";
 
 interface Ticket {
   id: string;
@@ -20,18 +27,93 @@ interface Ticket {
   customer_email?: string;
 }
 
+interface Stats {
+  all: number;
+  unassigned: number;
+  mine: number;
+  assigned: number;
+}
+
 interface AgentDashboardProps {
   user: User;
 }
 
+const PRIORITY_DOT: Record<string, string> = {
+  urgent: "bg-red-500",
+  high: "bg-orange-400",
+  medium: "bg-blue-400",
+  low: "bg-gray-300 dark:bg-gray-500",
+};
+
+const STATUS_CHIP: Record<string, string> = {
+  open: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+  in_progress: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  resolved: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  closed: "bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400",
+};
+
+function getRelativeTime(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+function getInitials(name: string) {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "?"
+  );
+}
+
+const AVATAR_COLORS = [
+  "from-indigo-400 to-purple-500",
+  "from-blue-400 to-cyan-500",
+  "from-rose-400 to-pink-500",
+  "from-emerald-400 to-teal-500",
+  "from-amber-400 to-orange-500",
+];
+
+function avatarColor(seed: string) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
 export default function AgentDashboard({ user }: AgentDashboardProps) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [stats, setStats] = useState<Stats>({ all: 0, unassigned: 0, mine: 0, assigned: 0 });
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "unassigned" | "assigned" | "mine">("all");
+  const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [assigningTicketId, setAssigningTicketId] = useState<string | null>(null);
   const [updatingTicketId, setUpdatingTicketId] = useState<string | null>(null);
   const supabase = createClient();
+
+  const fetchStats = useCallback(async () => {
+    const { data } = await supabase
+      .from("support_tickets")
+      .select("agent_id")
+      .neq("status", "closed");
+    if (!data) return;
+    setStats({
+      all: data.length,
+      unassigned: data.filter((t) => !t.agent_id).length,
+      mine: data.filter((t) => t.agent_id === user.id).length,
+      assigned: data.filter((t) => t.agent_id !== null).length,
+    });
+  }, [user.id, supabase]);
 
   const fetchTickets = useCallback(async () => {
     setIsLoading(true);
@@ -39,19 +121,16 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
       let query = supabase
         .from("support_tickets")
         .select(
-          `
-    *,
-    customer:user_profiles!customer_id (
-      id,
-      display_name,
-      avatar_url
-    )
-  `
+          `*,
+          customer:user_profiles!customer_id (
+            id,
+            display_name,
+            avatar_url
+          )`
         )
         .neq("status", "closed")
         .order("created_at", { ascending: false });
 
-      // Fixed switch statement with all cases
       switch (filter) {
         case "unassigned":
           query = query.is("agent_id", null);
@@ -62,33 +141,27 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
         case "mine":
           query = query.eq("agent_id", user.id);
           break;
-        case "all":
-        default:
-          // No additional filter - show all open tickets
-          break;
       }
 
       const { data, error } = await query;
-
       if (error) {
-        console.error("Error fetching tickets:", error.message, error.code, error.details, error.hint);
+        console.error("Error fetching tickets:", error.message, error.code);
         return;
       }
 
-      // Fixed type-safe mapping
-      const formattedTickets: Ticket[] = (data || []).map((ticket) => ({
-        id: ticket.id,
-        subject: ticket.subject,
-        status: ticket.status,
-        priority: ticket.priority,
-        created_at: ticket.created_at,
-        updated_at: ticket.updated_at,
-        customer_id: ticket.customer_id,
-        agent_id: ticket.agent_id,
-        customer_email: ticket.customer?.display_name || "Unknown Customer",
-      }));
-
-      setTickets(formattedTickets);
+      setTickets(
+        (data || []).map((ticket) => ({
+          id: ticket.id,
+          subject: ticket.subject,
+          status: ticket.status,
+          priority: ticket.priority,
+          created_at: ticket.created_at,
+          updated_at: ticket.updated_at,
+          customer_id: ticket.customer_id,
+          agent_id: ticket.agent_id,
+          customer_email: ticket.customer?.display_name || "Unknown Customer",
+        }))
+      );
     } catch (error) {
       console.error("Error fetching tickets:", error);
     } finally {
@@ -98,21 +171,16 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
 
   useEffect(() => {
     fetchTickets();
+    fetchStats();
 
-    // Set up real-time subscription for ticket updates
     const channel = supabase
       .channel("agent-tickets")
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "support_tickets",
-        },
-        (payload) => {
-          console.log("Ticket update received:", payload);
-          // Refresh tickets when any change occurs
+        { event: "*", schema: "public", table: "support_tickets" },
+        () => {
           fetchTickets();
+          fetchStats();
         }
       )
       .subscribe();
@@ -120,7 +188,7 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [filter, fetchTickets, supabase]);
+  }, [filter, fetchTickets, fetchStats, supabase]);
 
   const assignTicket = async (ticketId: string) => {
     setAssigningTicketId(ticketId);
@@ -129,10 +197,9 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
         .from("support_tickets")
         .update({ agent_id: user.id, status: "in_progress" })
         .eq("id", ticketId);
-
       if (updateError) throw updateError;
 
-      const { error: messageError } = await supabase.from("chat_messages").insert([
+      await supabase.from("chat_messages").insert([
         {
           ticket_id: ticketId,
           sender_id: user.id,
@@ -141,12 +208,9 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
         },
       ]);
 
-      if (messageError) throw messageError;
-
-      await fetchTickets();
+      await Promise.all([fetchTickets(), fetchStats()]);
     } catch (error) {
       console.error("Error assigning ticket:", error);
-      // You can add toast notification for error here
     } finally {
       setAssigningTicketId(null);
     }
@@ -159,10 +223,9 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
         .from("support_tickets")
         .update({ status })
         .eq("id", ticketId);
-
       if (updateError) throw updateError;
 
-      const { error: messageError } = await supabase.from("chat_messages").insert([
+      await supabase.from("chat_messages").insert([
         {
           ticket_id: ticketId,
           sender_id: user.id,
@@ -171,265 +234,254 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
         },
       ]);
 
-      if (messageError) throw messageError;
-
-      await fetchTickets();
+      await Promise.all([fetchTickets(), fetchStats()]);
     } catch (error) {
       console.error("Error updating ticket status:", error);
-      // You can add toast notification for error here
     } finally {
       setUpdatingTicketId(null);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "open":
-        return "bg-red-100 text-red-800 border-red-300";
-      case "in_progress":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "resolved":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "closed":
-        return "bg-gray-100 text-gray-800 border-gray-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
+  const filteredTickets = tickets.filter(
+    (t) =>
+      !search ||
+      t.subject.toLowerCase().includes(search.toLowerCase()) ||
+      (t.customer_email || "").toLowerCase().includes(search.toLowerCase())
+  );
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "urgent":
-        return "bg-red-100 text-red-800 border-red-300";
-      case "high":
-        return "bg-orange-100 text-orange-800 border-orange-300";
-      case "medium":
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case "low":
-        return "bg-gray-100 text-gray-800 border-gray-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
+  const selectedTicket = tickets.find((t) => t.id === selectedTicketId) ?? null;
 
-  const getTicketCount = () => {
-    const counts = {
-      all: tickets.length,
-      unassigned: tickets.filter((t) => !t.agent_id).length,
-      assigned: tickets.filter((t) => t.agent_id !== null).length,
-      mine: tickets.filter((t) => t.agent_id === user.id).length,
-    };
-    return counts[filter];
-  };
-
-  if (selectedTicketId) {
-    return (
-      <div className="space-y-4">
-        <Button variant="outline" onClick={() => setSelectedTicketId(null)} className="mb-4">
-          ← Back to Queue
-        </Button>
-        <ChatInterface
-          ticketId={selectedTicketId}
-          userId={user.id}
-          userRole="agent"
-          onClose={() => setSelectedTicketId(null)}
-        />
-      </div>
-    );
-  }
+  const TABS = [
+    { key: "all" as const, label: "All", count: stats.all, icon: Inbox },
+    { key: "unassigned" as const, label: "New", count: stats.unassigned, icon: AlertTriangle },
+    { key: "mine" as const, label: "Mine", count: stats.mine, icon: UserCheck },
+    { key: "assigned" as const, label: "Active", count: stats.assigned, icon: Users },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Support Queue</h2>
-          <p className="text-gray-600">
-            Manage customer support tickets ({getTicketCount()} {filter})
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant={filter === "all" ? "default" : "outline"}
-            onClick={() => setFilter("all")}
-            size="sm"
-          >
-            All Open
-          </Button>
-          <Button
-            variant={filter === "unassigned" ? "default" : "outline"}
-            onClick={() => setFilter("unassigned")}
-            size="sm"
-          >
-            Unassigned
-          </Button>
-          <Button
-            variant={filter === "mine" ? "default" : "outline"}
-            onClick={() => setFilter("mine")}
-            size="sm"
-          >
-            My Tickets
-          </Button>
-          <Button
-            variant={filter === "assigned" ? "default" : "outline"}
-            onClick={() => setFilter("assigned")}
-            size="sm"
-          >
-            All Assigned
-          </Button>
-        </div>
-      </div>
+    <div className="flex h-full">
+      {/* ── Left Sidebar ── */}
+      <div className="w-[300px] flex-shrink-0 flex flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
 
-      {/* Loading State */}
-      {isLoading ? (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
-              <p className="text-gray-600">Loading tickets...</p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : tickets.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>No Tickets</CardTitle>
-            <CardDescription>
-              {filter === "unassigned"
-                ? "No unassigned tickets at the moment."
-                : filter === "mine"
-                ? "You don't have any assigned tickets."
-                : filter === "all"
-                ? "No open tickets at the moment."
-                : "No tickets match the current filter."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => setFilter("all")} variant="outline" className="w-full">
-              Show All Open Tickets
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {tickets.map((ticket) => (
-            <Card key={ticket.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg line-clamp-1">{ticket.subject}</CardTitle>
-                    <CardDescription className="flex items-center gap-4 text-sm">
-                      <span>Customer: {ticket.customer_email}</span>
-                      <span>•</span>
-                      <span>Created {new Date(ticket.created_at).toLocaleDateString()}</span>
-                      {ticket.agent_id && (
-                        <>
-                          <span>•</span>
-                          <span className="text-xs">
-                            Assigned: {ticket.agent_id === user.id ? "You" : "Another Agent"}
-                          </span>
-                        </>
-                      )}
-                    </CardDescription>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <Badge className={getStatusColor(ticket.status)}>
-                      {ticket.status.replace("_", " ")}
-                    </Badge>
-                    <Badge className={getPriorityColor(ticket.priority)} variant="secondary">
-                      {ticket.priority}
-                    </Badge>
+        {/* Sidebar Header */}
+        <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Support Queue</h2>
+            <span className="text-xs text-gray-400">{stats.all} open</span>
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="flex gap-1">
+            {TABS.map(({ key, label, count }) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`flex-1 flex flex-col items-center py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  filter === key
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                }`}
+              >
+                <span className={`text-base font-bold leading-none mb-0.5 ${filter === key ? "text-white" : "text-gray-800 dark:text-white"}`}>
+                  {count}
+                </span>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="px-3 py-2.5 border-b border-gray-100 dark:border-gray-700">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search tickets..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-8 pr-3 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition"
+            />
+          </div>
+        </div>
+
+        {/* Ticket List */}
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="space-y-px pt-1">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-2.5 px-3 py-3">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4" />
+                    <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded animate-pulse w-1/2" />
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2 flex-wrap">
-                  <Button
+              ))}
+            </div>
+          ) : filteredTickets.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 text-center px-4">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                {search ? "No tickets match your search" : "No tickets here"}
+              </p>
+              {(search || filter !== "all") && (
+                <button
+                  onClick={() => { setSearch(""); setFilter("all"); }}
+                  className="mt-2 text-xs text-blue-500 hover:text-blue-600"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          ) : (
+            <div>
+              {filteredTickets.map((ticket) => {
+                const isSelected = selectedTicketId === ticket.id;
+                return (
+                  <div
+                    key={ticket.id}
                     onClick={() => setSelectedTicketId(ticket.id)}
-                    variant="default"
-                    size="sm"
-                    className="flex-1"
+                    className={`group relative flex items-start gap-2.5 px-3 py-3 cursor-pointer border-l-2 transition-colors ${
+                      isSelected
+                        ? "bg-blue-50 dark:bg-blue-900/20 border-l-blue-500"
+                        : "border-l-transparent hover:bg-gray-50 dark:hover:bg-gray-700/40"
+                    }`}
                   >
-                    Open Chat
-                  </Button>
-
-                  {/* Assign Button */}
-                  {!ticket.agent_id && (
-                    <Button
-                      onClick={() => assignTicket(ticket.id)}
-                      variant="outline"
-                      size="sm"
-                      disabled={assigningTicketId === ticket.id}
-                      className="min-w-[100px]"
+                    {/* Avatar */}
+                    <div
+                      className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarColor(
+                        ticket.customer_email || ticket.id
+                      )} flex items-center justify-center flex-shrink-0 shadow-sm`}
                     >
-                      {assigningTicketId === ticket.id ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                          Assigning...
-                        </>
-                      ) : (
-                        "Assign to Me"
-                      )}
-                    </Button>
-                  )}
+                      <span className="text-white font-semibold text-xs">
+                        {getInitials(ticket.customer_email || "?")}
+                      </span>
+                    </div>
 
-                  {/* Status Action Buttons */}
-                  {ticket.agent_id === user.id && (
-                    <>
-                      {ticket.status === "open" && (
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1 mb-0.5">
+                        {ticket.priority === "urgent" && (
+                          <AlertTriangle className="h-3 w-3 text-red-500 flex-shrink-0" />
+                        )}
+                        <span
+                          className={`text-xs font-medium truncate ${
+                            isSelected
+                              ? "text-blue-700 dark:text-blue-300"
+                              : "text-gray-900 dark:text-white"
+                          }`}
+                        >
+                          {ticket.subject}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 truncate mb-1">
+                        {ticket.customer_email}
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`text-xs px-1.5 py-0.5 rounded-full font-medium capitalize ${
+                            STATUS_CHIP[ticket.status] || "bg-gray-100 text-gray-500"
+                          }`}
+                        >
+                          {ticket.status.replace("_", " ")}
+                        </span>
+                        <span className="text-xs text-gray-400">{getRelativeTime(ticket.created_at)}</span>
+                      </div>
+                    </div>
+
+                    {/* Priority dot */}
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
+                        PRIORITY_DOT[ticket.priority] || "bg-gray-300"
+                      }`}
+                      title={`Priority: ${ticket.priority}`}
+                    />
+
+                    {/* Hover actions */}
+                    <div
+                      className="absolute right-2 bottom-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {!ticket.agent_id && (
+                        <Button
+                          onClick={() => assignTicket(ticket.id)}
+                          variant="outline"
+                          size="sm"
+                          disabled={assigningTicketId === ticket.id}
+                          className="h-6 text-[11px] px-2 bg-white dark:bg-gray-800"
+                        >
+                          {assigningTicketId === ticket.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            "Assign"
+                          )}
+                        </Button>
+                      )}
+                      {ticket.agent_id === user.id && ticket.status === "open" && (
                         <Button
                           onClick={() => updateTicketStatus(ticket.id, "in_progress")}
                           variant="outline"
                           size="sm"
                           disabled={updatingTicketId === ticket.id}
+                          className="h-6 text-[11px] px-2 bg-white dark:bg-gray-800"
                         >
-                          Start Working
+                          {updatingTicketId === ticket.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Start"}
                         </Button>
                       )}
-
-                      {ticket.status === "in_progress" && (
+                      {ticket.agent_id === user.id && ticket.status === "in_progress" && (
                         <Button
                           onClick={() => updateTicketStatus(ticket.id, "resolved")}
                           variant="outline"
                           size="sm"
                           disabled={updatingTicketId === ticket.id}
+                          className="h-6 text-[11px] px-2 bg-white dark:bg-gray-800 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                         >
-                          {updatingTicketId === ticket.id ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                              Saving...
-                            </>
-                          ) : (
-                            "Mark Resolved"
-                          )}
+                          {updatingTicketId === ticket.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Resolve"}
                         </Button>
                       )}
-
-                      {ticket.status === "resolved" && (
+                      {ticket.agent_id === user.id && ticket.status === "resolved" && (
                         <Button
                           onClick={() => updateTicketStatus(ticket.id, "closed")}
                           variant="outline"
                           size="sm"
                           disabled={updatingTicketId === ticket.id}
+                          className="h-6 text-[11px] px-2 bg-white dark:bg-gray-800"
                         >
-                          {updatingTicketId === ticket.id ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                              Closing...
-                            </>
-                          ) : (
-                            "Close Ticket"
-                          )}
+                          {updatingTicketId === ticket.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Close"}
                         </Button>
                       )}
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </div>
+
+      {/* ── Right Panel ── */}
+      <div className="flex-1 overflow-hidden flex flex-col bg-gray-50 dark:bg-gray-900">
+        {selectedTicketId && selectedTicket ? (
+          <ChatInterface
+            key={selectedTicketId}
+            ticketId={selectedTicketId}
+            userId={user.id}
+            userRole="agent"
+            onClose={() => setSelectedTicketId(null)}
+            className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 overflow-hidden"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center mb-4 shadow-sm">
+              <MessageSquare className="h-7 w-7 text-gray-300 dark:text-gray-600" />
+            </div>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No conversation open</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              Select a ticket from the list to start chatting
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

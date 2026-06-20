@@ -1,6 +1,6 @@
 import { getUserProfile, ensureUserProfile } from "@/lib/auth";
-import AuthButton from "@/components/auth-button";
 import AgentDashboard from "@/components/agent-dashboard";
+import AuthButton from "@/components/auth-button";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { MessageSquare } from "lucide-react";
@@ -21,32 +21,35 @@ export default async function AgentPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
-                <MessageSquare className="w-4 h-4 text-background" />
-              </div>
-              <span className="text-lg font-semibold tracking-tight">
-                SupportHub
-              </span>
-            </Link>
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Navbar */}
+      <nav className="flex-shrink-0 h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10">
+        <div className="h-full max-w-full px-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+              <MessageSquare className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-sm font-semibold text-gray-900 dark:text-white tracking-tight">
+              SupportHub
+            </span>
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block text-right">
+              <p className="text-xs font-medium text-gray-900 dark:text-white">
+                {profile.display_name || user.email}
+              </p>
+              <p className="text-xs text-gray-400 capitalize">{profile.role}</p>
+            </div>
             <AuthButton />
           </div>
         </div>
       </nav>
 
-      {/* Main content */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Agent Dashboard</h1>
-          <p className="text-muted-foreground">Welcome, {profile.display_name || user.email}</p>
-        </div>
+      {/* Split pane fills remaining height */}
+      <div className="flex-1 overflow-hidden">
         <AgentDashboard user={user} />
       </div>
-    </main>
+    </div>
   );
 }
