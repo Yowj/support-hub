@@ -4,6 +4,7 @@ import { AuthProvider } from "@/context/auth-context";
 import { getUserProfile } from "@/lib/auth";
 import Navbar from "@/components/Navbar";
 import "./globals.css";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "SupportHub - Modern Customer Support Platform",
@@ -20,6 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <AuthProvider user={user} profile={profile}>
             <Navbar />
             {children}
+            <Footer />
           </AuthProvider>
         </ThemeProvider>
       </body>
