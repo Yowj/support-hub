@@ -1,9 +1,6 @@
 import { getUserProfile, ensureUserProfile } from "@/lib/auth";
-import AuthButton from "@/components/auth-button";
 import CustomerDashboard from "@/components/customer-dashboard";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { MessageSquare } from "lucide-react";
 
 export default async function Dashboard() {
   const { user, profile } = await getUserProfile();

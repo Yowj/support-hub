@@ -1,4 +1,3 @@
-import AuthButton from "@/components/auth-button";
 import { ReactNode } from "react";
 import { Headset } from "lucide-react";
 
@@ -29,7 +28,6 @@ export default function PageLayout({ title, subtitle, children }: PageLayoutProp
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">{subtitle}</p>
               </div>
             </div>
-            <AuthButton />
           </div>
         </div>
       </div>

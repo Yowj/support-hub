@@ -1,6 +1,5 @@
 import { getUserProfile, ensureUserProfile } from "@/lib/auth";
 import AgentDashboard from "@/components/agent-dashboard";
-import AuthButton from "@/components/auth-button";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { MessageSquare } from "lucide-react";
@@ -41,7 +40,7 @@ export default async function AgentPage() {
               </p>
               <p className="text-xs text-gray-400 capitalize">{profile.role}</p>
             </div>
-            <AuthButton />
+
           </div>
         </div>
       </nav>
