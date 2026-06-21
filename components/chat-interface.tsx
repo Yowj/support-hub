@@ -131,7 +131,10 @@ export default function ChatInterface({ ticketId, userId, userRole, onClose, cla
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "chat_messages", filter: `ticket_id=eq.${ticketId}` },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new as Message]);
+          const incoming = payload.new as Message;
+          setMessages((prev) =>
+            prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]
+          );
         }
       )
       .subscribe();
