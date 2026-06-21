@@ -3,11 +3,18 @@
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import NewTicketForm from "./new-ticket-form";
 import ChatInterface from "./chat-interface";
 import type { User } from "@supabase/supabase-js";
+import {
+  Search,
+  Inbox,
+  Clock,
+  CheckCircle,
+  PlusCircle,
+  MessageSquare,
+  Hash,
+} from "lucide-react";
 
 interface Ticket {
   id: string;
@@ -18,56 +25,127 @@ interface Ticket {
   updated_at: string;
 }
 
+interface Stats {
+  all: number;
+  open: number;
+  active: number;
+  resolved: number;
+}
+
 interface CustomerDashboardProps {
   user: User;
 }
 
+const PRIORITY_DOT: Record<string, string> = {
+  urgent: "bg-red-500",
+  high: "bg-orange-400",
+  medium: "bg-blue-400",
+  low: "bg-muted-foreground/40",
+};
+
+const STATUS_CHIP: Record<string, string> = {
+  open: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+  in_progress: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  resolved: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  closed: "bg-muted text-muted-foreground",
+};
+
+const STATUS_ICON_BG: Record<string, string> = {
+  open: "from-red-400 to-rose-500",
+  in_progress: "from-amber-400 to-orange-500",
+  resolved: "from-emerald-400 to-teal-500",
+  closed: "from-gray-300 to-gray-400",
+};
+
+function getRelativeTime(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+type ViewMode = "list" | "new-ticket";
+
 export default function CustomerDashboard({ user }: CustomerDashboardProps) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [stats, setStats] = useState<Stats>({ all: 0, open: 0, active: 0, resolved: 0 });
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
-  const [showNewTicketForm, setShowNewTicketForm] = useState(false);
+  const [filter, setFilter] = useState<"all" | "open" | "active" | "resolved">("all");
+  const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const supabase = createClient();
 
-  // Use useCallback to memoize the fetchTickets function
+  const fetchStats = useCallback(async () => {
+    const { data } = await supabase
+      .from("support_tickets")
+      .select("status")
+      .eq("customer_id", user.id);
+    if (!data) return;
+    setStats({
+      all: data.length,
+      open: data.filter((t) => t.status === "open").length,
+      active: data.filter((t) => t.status === "in_progress").length,
+      resolved: data.filter((t) => t.status === "resolved" || t.status === "closed").length,
+    });
+  }, [user.id, supabase]);
+
   const fetchTickets = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("support_tickets")
         .select("*")
         .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      switch (filter) {
+        case "open":
+          query = query.eq("status", "open");
+          break;
+        case "active":
+          query = query.eq("status", "in_progress");
+          break;
+        case "resolved":
+          query = query.in("status", ["resolved", "closed"]);
+          break;
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.error("Error fetching tickets:", error);
+        return;
+      }
       setTickets(data || []);
-      setError(null);
     } catch (error) {
       console.error("Error fetching tickets:", error);
-      setError("Failed to load tickets. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }, [user.id, supabase]);
+  }, [filter, user.id, supabase]);
 
   useEffect(() => {
     fetchTickets();
+    fetchStats();
 
-    // Set up real-time subscription for ticket updates
     const channel = supabase
-      .channel('customer-tickets')
+      .channel("customer-tickets")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'support_tickets',
+          event: "*",
+          schema: "public",
+          table: "support_tickets",
           filter: `customer_id=eq.${user.id}`,
         },
-        (payload) => {
-          console.log('Ticket update received:', payload);
-          // Refresh tickets when any change occurs
+        () => {
           fetchTickets();
+          fetchStats();
         }
       )
       .subscribe();
@@ -75,142 +153,210 @@ export default function CustomerDashboard({ user }: CustomerDashboardProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchTickets, user.id, supabase]);
+  }, [filter, fetchTickets, fetchStats, user.id, supabase]);
 
   const handleTicketCreated = (ticketId: string) => {
-    setShowNewTicketForm(false);
+    setViewMode("list");
     setSelectedTicketId(ticketId);
     fetchTickets();
+    fetchStats();
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "open":
-        return "bg-red-100 text-red-800";
-      case "in_progress":
-        return "bg-yellow-100 text-yellow-800";
-      case "resolved":
-        return "bg-green-100 text-green-800";
-      case "closed":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  const filteredTickets = tickets.filter(
+    (t) => !search || t.subject.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "urgent":
-        return "bg-red-100 text-red-800";
-      case "high":
-        return "bg-orange-100 text-orange-800";
-      case "medium":
-        return "bg-blue-100 text-blue-800";
-      case "low":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  if (selectedTicketId) {
-    return (
-      <ChatInterface
-        ticketId={selectedTicketId}
-        userId={user.id}
-        userRole="customer"
-        onClose={() => setSelectedTicketId(null)}
-      />
-    );
-  }
-
-  if (showNewTicketForm) {
-    return (
-      <div className="space-y-4">
-        <Button
-          variant="outline"
-          onClick={() => setShowNewTicketForm(false)}
-        >
-          ← Back to Tickets
-        </Button>
-        <NewTicketForm
-          userId={user.id}
-          onTicketCreated={handleTicketCreated}
-        />
-      </div>
-    );
-  }
+  const TABS = [
+    { key: "all" as const, label: "All", count: stats.all, icon: Inbox },
+    { key: "open" as const, label: "Open", count: stats.open, icon: Clock },
+    { key: "active" as const, label: "Active", count: stats.active, icon: MessageSquare },
+    { key: "resolved" as const, label: "Done", count: stats.resolved, icon: CheckCircle },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Support Tickets</h2>
-          <p className="text-gray-600">Manage your support requests</p>
-        </div>
-        <Button onClick={() => setShowNewTicketForm(true)}>
-          Create New Ticket
-        </Button>
-      </div>
+    <div className="flex h-full">
+      {/* Left Sidebar */}
+      <div className="w-[300px] flex-shrink-0 flex flex-col border-r border-border bg-card">
 
-      {error && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <div className="text-red-600 mb-4">{error}</div>
-              <Button onClick={() => fetchTickets()} variant="outline">
-                Try Again
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {isLoading ? (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">Loading tickets...</div>
-          </CardContent>
-        </Card>
-      ) : !error && tickets.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>No Support Tickets</CardTitle>
-            <CardDescription>
-              You haven&apos;t created any support tickets yet. Click &quot;Create New Ticket&quot; to get started.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      ) : !error ? (
-        <div className="grid gap-4">
-          {tickets.map((ticket) => (
-            <Card
-              key={ticket.id}
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => setSelectedTicketId(ticket.id)}
+        {/* Sidebar Header */}
+        <div className="px-4 pt-4 pb-3 border-b border-border">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-foreground">My Tickets</h2>
+            <Button
+              size="sm"
+              onClick={() => { setViewMode("new-ticket"); setSelectedTicketId(null); }}
+              className="h-6 text-[11px] px-2"
             >
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{ticket.subject}</CardTitle>
-                    <CardDescription>
-                      Created {new Date(ticket.created_at).toLocaleDateString()}
-                    </CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge className={getStatusColor(ticket.status)}>
-                      {ticket.status}
-                    </Badge>
-                    <Badge className={getPriorityColor(ticket.priority)}>
-                      {ticket.priority}
-                    </Badge>
+              <PlusCircle className="h-3 w-3 mr-1" />
+              New
+            </Button>
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="flex gap-1">
+            {TABS.map(({ key, label, count }) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`flex-1 flex flex-col items-center py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  filter === key
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <span className={`text-base font-bold leading-none mb-0.5 ${filter === key ? "text-primary-foreground" : "text-foreground"}`}>
+                  {count}
+                </span>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="px-3 py-2.5 border-b border-border">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search tickets..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-8 pr-3 py-1.5 rounded-md border border-border bg-background text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-transparent transition"
+            />
+          </div>
+        </div>
+
+        {/* Ticket List */}
+        <div className="flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="space-y-px pt-1">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-2.5 px-3 py-3">
+                  <div className="w-8 h-8 rounded-full bg-muted animate-pulse flex-shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3 bg-muted rounded animate-pulse w-3/4" />
+                    <div className="h-2.5 bg-muted/50 rounded animate-pulse w-1/2" />
                   </div>
                 </div>
-              </CardHeader>
-            </Card>
-          ))}
+              ))}
+            </div>
+          ) : filteredTickets.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 text-center px-4">
+              <p className="text-xs text-muted-foreground">
+                {search ? "No tickets match your search" : "No tickets yet"}
+              </p>
+              {(search || filter !== "all") && (
+                <button
+                  onClick={() => { setSearch(""); setFilter("all"); }}
+                  className="mt-2 text-xs text-primary hover:text-primary/80"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          ) : (
+            <div>
+              {filteredTickets.map((ticket) => {
+                const isSelected = selectedTicketId === ticket.id && viewMode === "list";
+                return (
+                  <div
+                    key={ticket.id}
+                    onClick={() => { setSelectedTicketId(ticket.id); setViewMode("list"); }}
+                    className={`group relative flex items-start gap-2.5 px-3 py-3 cursor-pointer border-l-2 transition-colors ${
+                      isSelected
+                        ? "bg-accent border-l-primary"
+                        : "border-l-transparent hover:bg-accent/50"
+                    }`}
+                  >
+                    {/* Status-colored icon */}
+                    <div
+                      className={`w-8 h-8 rounded-full bg-gradient-to-br ${STATUS_ICON_BG[ticket.status] || "from-gray-300 to-gray-400"} flex items-center justify-center flex-shrink-0 shadow-sm`}
+                    >
+                      <Hash className="h-3.5 w-3.5 text-white" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="mb-0.5">
+                        <span className="text-xs font-medium truncate block text-foreground">
+                          {ticket.subject}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`text-xs px-1.5 py-0.5 rounded-full font-medium capitalize ${
+                            STATUS_CHIP[ticket.status] || "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {ticket.status.replace("_", " ")}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{getRelativeTime(ticket.created_at)}</span>
+                      </div>
+                    </div>
+
+                    {/* Priority dot */}
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
+                        PRIORITY_DOT[ticket.priority] || "bg-gray-300"
+                      }`}
+                      title={`Priority: ${ticket.priority}`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      ) : null}
+      </div>
+
+      {/* Right Panel */}
+      <div className="flex-1 overflow-hidden flex flex-col bg-background">
+        {viewMode === "new-ticket" ? (
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-center gap-3 mb-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                >
+                  ← Back
+                </Button>
+                <h2 className="text-lg font-semibold text-foreground">New Support Ticket</h2>
+              </div>
+              <NewTicketForm userId={user.id} onTicketCreated={handleTicketCreated} />
+            </div>
+          </div>
+        ) : selectedTicketId ? (
+          <ChatInterface
+            key={selectedTicketId}
+            ticketId={selectedTicketId}
+            userId={user.id}
+            userRole="customer"
+            onClose={() => setSelectedTicketId(null)}
+            className="flex flex-col h-full bg-background overflow-hidden"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-4 shadow-sm">
+              <MessageSquare className="h-7 w-7 text-muted-foreground/30" />
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">No ticket selected</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Select a ticket from the list or create a new one
+            </p>
+            <Button
+              onClick={() => setViewMode("new-ticket")}
+              className="mt-4"
+              size="sm"
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Create New Ticket
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

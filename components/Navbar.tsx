@@ -43,8 +43,8 @@ export default function Navbar() {
   const role = profile?.role || "customer";
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <nav className="h-16 shrink-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
+      <div className="mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
@@ -82,7 +82,7 @@ export default function Navbar() {
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex h-16 items-center gap-2">
               <ThemeToggle />
               <Link href="/login">
                 <Button variant="outline" size="sm" className="gap-1.5">

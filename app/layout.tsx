@@ -18,8 +18,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider user={user} profile={profile}>
-            <ConditionalNavbar />
-            {children}
+            <div className="h-screen flex flex-col">
+              <ConditionalNavbar />
+              <main className="flex-1 min-h-0">
+                {children}
+              </main>
+            </div>
           </AuthProvider>
         </ThemeProvider>
       </body>

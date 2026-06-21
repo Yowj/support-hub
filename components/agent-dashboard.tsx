@@ -42,14 +42,14 @@ const PRIORITY_DOT: Record<string, string> = {
   urgent: "bg-red-500",
   high: "bg-orange-400",
   medium: "bg-blue-400",
-  low: "bg-gray-300 dark:bg-gray-500",
+  low: "bg-muted-foreground/40",
 };
 
 const STATUS_CHIP: Record<string, string> = {
   open: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
   in_progress: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
   resolved: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  closed: "bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400",
+  closed: "bg-muted text-muted-foreground",
 };
 
 function getRelativeTime(dateStr: string) {
@@ -261,13 +261,13 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
   return (
     <div className="flex h-full">
       {/* ── Left Sidebar ── */}
-      <div className="w-[300px] flex-shrink-0 flex flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      <div className="w-[300px] flex-shrink-0 flex flex-col border-r border-border bg-card">
 
         {/* Sidebar Header */}
-        <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-700">
+        <div className="px-4 pt-4 pb-3 border-b border-border">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Support Queue</h2>
-            <span className="text-xs text-gray-400">{stats.all} open</span>
+            <h2 className="text-sm font-semibold text-foreground">Support Queue</h2>
+            <span className="text-xs text-muted-foreground">{stats.all} open</span>
           </div>
 
           {/* Filter Tabs */}
@@ -278,11 +278,11 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
                 onClick={() => setFilter(key)}
                 className={`flex-1 flex flex-col items-center py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   filter === key
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
                 }`}
               >
-                <span className={`text-base font-bold leading-none mb-0.5 ${filter === key ? "text-white" : "text-gray-800 dark:text-white"}`}>
+                <span className={`text-base font-bold leading-none mb-0.5 ${filter === key ? "text-primary-foreground" : "text-foreground"}`}>
                   {count}
                 </span>
                 {label}
@@ -292,15 +292,15 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
         </div>
 
         {/* Search */}
-        <div className="px-3 py-2.5 border-b border-gray-100 dark:border-gray-700">
+        <div className="px-3 py-2.5 border-b border-border">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
             <input
               type="text"
               placeholder="Search tickets..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full pl-8 pr-3 py-1.5 rounded-md border border-border bg-background text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-transparent transition"
             />
           </div>
         </div>
@@ -311,23 +311,23 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
             <div className="space-y-px pt-1">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-2.5 px-3 py-3">
-                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse flex-shrink-0" />
+                  <div className="w-8 h-8 rounded-full bg-muted animate-pulse flex-shrink-0" />
                   <div className="flex-1 space-y-1.5">
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4" />
-                    <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded animate-pulse w-1/2" />
+                    <div className="h-3 bg-muted rounded animate-pulse w-3/4" />
+                    <div className="h-2.5 bg-muted/50 rounded animate-pulse w-1/2" />
                   </div>
                 </div>
               ))}
             </div>
           ) : filteredTickets.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 text-center px-4">
-              <p className="text-xs text-gray-400 dark:text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {search ? "No tickets match your search" : "No tickets here"}
               </p>
               {(search || filter !== "all") && (
                 <button
                   onClick={() => { setSearch(""); setFilter("all"); }}
-                  className="mt-2 text-xs text-blue-500 hover:text-blue-600"
+                  className="mt-2 text-xs text-primary hover:text-primary/80"
                 >
                   Clear filters
                 </button>
@@ -343,8 +343,8 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
                     onClick={() => setSelectedTicketId(ticket.id)}
                     className={`group relative flex items-start gap-2.5 px-3 py-3 cursor-pointer border-l-2 transition-colors ${
                       isSelected
-                        ? "bg-blue-50 dark:bg-blue-900/20 border-l-blue-500"
-                        : "border-l-transparent hover:bg-gray-50 dark:hover:bg-gray-700/40"
+                        ? "bg-accent border-l-primary"
+                        : "border-l-transparent hover:bg-accent/50"
                     }`}
                   >
                     {/* Avatar */}
@@ -364,28 +364,22 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
                         {ticket.priority === "urgent" && (
                           <AlertTriangle className="h-3 w-3 text-red-500 flex-shrink-0" />
                         )}
-                        <span
-                          className={`text-xs font-medium truncate ${
-                            isSelected
-                              ? "text-blue-700 dark:text-blue-300"
-                              : "text-gray-900 dark:text-white"
-                          }`}
-                        >
+                        <span className="text-xs font-medium truncate text-foreground">
                           {ticket.subject}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 truncate mb-1">
+                      <p className="text-xs text-muted-foreground truncate mb-1">
                         {ticket.customer_email}
                       </p>
                       <div className="flex items-center gap-1.5">
                         <span
                           className={`text-xs px-1.5 py-0.5 rounded-full font-medium capitalize ${
-                            STATUS_CHIP[ticket.status] || "bg-gray-100 text-gray-500"
+                            STATUS_CHIP[ticket.status] || "bg-muted text-muted-foreground"
                           }`}
                         >
                           {ticket.status.replace("_", " ")}
                         </span>
-                        <span className="text-xs text-gray-400">{getRelativeTime(ticket.created_at)}</span>
+                        <span className="text-xs text-muted-foreground">{getRelativeTime(ticket.created_at)}</span>
                       </div>
                     </div>
 
@@ -408,7 +402,7 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
                           variant="outline"
                           size="sm"
                           disabled={assigningTicketId === ticket.id}
-                          className="h-6 text-[11px] px-2 bg-white dark:bg-gray-800"
+                          className="h-6 text-[11px] px-2 bg-card"
                         >
                           {assigningTicketId === ticket.id ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
@@ -423,7 +417,7 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
                           variant="outline"
                           size="sm"
                           disabled={updatingTicketId === ticket.id}
-                          className="h-6 text-[11px] px-2 bg-white dark:bg-gray-800"
+                          className="h-6 text-[11px] px-2 bg-card"
                         >
                           {updatingTicketId === ticket.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Start"}
                         </Button>
@@ -445,7 +439,7 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
                           variant="outline"
                           size="sm"
                           disabled={updatingTicketId === ticket.id}
-                          className="h-6 text-[11px] px-2 bg-white dark:bg-gray-800"
+                          className="h-6 text-[11px] px-2 bg-card"
                         >
                           {updatingTicketId === ticket.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Close"}
                         </Button>
@@ -460,7 +454,7 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
       </div>
 
       {/* ── Right Panel ── */}
-      <div className="flex-1 overflow-hidden flex flex-col bg-gray-50 dark:bg-gray-900">
+      <div className="flex-1 overflow-hidden flex flex-col bg-background">
         {selectedTicketId && selectedTicket ? (
           <ChatInterface
             key={selectedTicketId}
@@ -468,15 +462,15 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
             userId={user.id}
             userRole="agent"
             onClose={() => setSelectedTicketId(null)}
-            className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 overflow-hidden"
+            className="flex flex-col h-full bg-background overflow-hidden"
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center mb-4 shadow-sm">
-              <MessageSquare className="h-7 w-7 text-gray-300 dark:text-gray-600" />
+            <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-4 shadow-sm">
+              <MessageSquare className="h-7 w-7 text-muted-foreground/30" />
             </div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No conversation open</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-sm font-medium text-muted-foreground">No conversation open</p>
+            <p className="text-xs text-muted-foreground mt-1">
               Select a ticket from the list to start chatting
             </p>
           </div>

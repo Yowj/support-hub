@@ -18,21 +18,5 @@ export default async function Dashboard() {
     return redirect("/agent");
   }
 
-  return (
-    <main className="min-h-screen bg-background">
-      {/* Navigation */}
-      
-
-      {/* Main content */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Customer Support</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {profile.display_name || user.email}
-          </p>
-        </div>
-        <CustomerDashboard user={user} />
-      </div>
-    </main>
-  );
+  return <CustomerDashboard user={user} />;
 }
