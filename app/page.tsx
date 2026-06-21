@@ -2,23 +2,11 @@
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/mode-toggle";
-import {
-  MessageSquare,
-  Zap,
-  Shield,
-  Clock,
-  Users,
-  BarChart3,
-  ArrowRight,
-  Star,
-  Sparkles,
-} from "lucide-react";
+import { MessageSquare, Zap, Shield, Clock, Users, BarChart3, ArrowRight, Star, Sparkles } from "lucide-react";
 
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-44 lg:pb-32">
         {/* Background gradient */}
@@ -33,9 +21,7 @@ export function LandingPage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border/50 bg-muted/50 mb-8 animate-fade-in">
               <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">
-                Now with AI-powered responses
-              </span>
+              <span className="text-sm font-medium">Now with AI-powered responses</span>
             </div>
 
             {/* Main headline */}
@@ -47,9 +33,8 @@ export function LandingPage() {
 
             {/* Subheadline */}
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in-up animation-delay-200">
-              A modern support platform that helps your team deliver
-              exceptional customer experiences. Real-time chat, smart routing,
-              and powerful analytics.
+              A modern support platform that helps your team deliver exceptional customer experiences. Real-time chat,
+              smart routing, and powerful analytics.
             </p>
 
             {/* CTA buttons */}
@@ -60,11 +45,7 @@ export function LandingPage() {
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
-              <Button
-                variant="outline"
-                size="lg"
-                className="h-12 px-8 text-base"
-              >
+              <Button variant="outline" size="lg" className="h-12 px-8 text-base">
                 Watch demo
               </Button>
             </div>
@@ -73,9 +54,7 @@ export function LandingPage() {
             <div className="flex items-center justify-center gap-8 mt-12 pt-12 border-t border-border/50 animate-fade-in-up animation-delay-600">
               <div className="text-center">
                 <div className="text-2xl font-bold">10k+</div>
-                <div className="text-sm text-muted-foreground">
-                  Active users
-                </div>
+                <div className="text-sm text-muted-foreground">Active users</div>
               </div>
               <div className="h-8 w-px bg-border" />
               <div className="text-center">
@@ -144,9 +123,7 @@ export function LandingPage() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-xs">
-                            Resolved
-                          </div>
+                          <div className="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-xs">Resolved</div>
                         </div>
                       </div>
                       <div className="space-y-4">
@@ -201,38 +178,32 @@ export function LandingPage() {
               {
                 icon: MessageSquare,
                 title: "Real-time Chat",
-                description:
-                  "Engage with customers instantly through live chat. No more waiting for email responses.",
+                description: "Engage with customers instantly through live chat. No more waiting for email responses.",
               },
               {
                 icon: Zap,
                 title: "Smart Routing",
-                description:
-                  "Automatically route tickets to the right team members based on skills and availability.",
+                description: "Automatically route tickets to the right team members based on skills and availability.",
               },
               {
                 icon: Shield,
                 title: "Enterprise Security",
-                description:
-                  "Bank-level encryption and compliance with SOC 2, GDPR, and HIPAA standards.",
+                description: "Bank-level encryption and compliance with SOC 2, GDPR, and HIPAA standards.",
               },
               {
                 icon: Clock,
                 title: "24/7 Availability",
-                description:
-                  "AI-powered responses handle common queries around the clock, even when you're away.",
+                description: "AI-powered responses handle common queries around the clock, even when you're away.",
               },
               {
                 icon: Users,
                 title: "Team Collaboration",
-                description:
-                  "Internal notes, mentions, and shared inboxes keep your team perfectly in sync.",
+                description: "Internal notes, mentions, and shared inboxes keep your team perfectly in sync.",
               },
               {
                 icon: BarChart3,
                 title: "Advanced Analytics",
-                description:
-                  "Track response times, customer satisfaction, and agent performance in real-time.",
+                description: "Track response times, customer satisfaction, and agent performance in real-time.",
               },
             ].map((feature, index) => (
               <div
@@ -261,9 +232,7 @@ export function LandingPage() {
               { value: "24/7", label: "AI-powered support" },
             ].map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-4xl lg:text-5xl font-bold tracking-tight mb-2">
-                  {stat.value}
-                </div>
+                <div className="text-4xl lg:text-5xl font-bold tracking-tight mb-2">{stat.value}</div>
                 <div className="text-muted-foreground">{stat.label}</div>
               </div>
             ))}
@@ -280,9 +249,7 @@ export function LandingPage() {
               <br />
               around the world
             </h2>
-            <p className="text-lg text-muted-foreground">
-              See what our customers have to say about their experience.
-            </p>
+            <p className="text-lg text-muted-foreground">See what our customers have to say about their experience.</p>
           </div>
         </div>
 
@@ -381,16 +348,10 @@ export function LandingPage() {
                 avatar: "AP",
               },
             ].map((testimonial, index) => (
-              <div
-                key={index}
-                className="flex-shrink-0 w-[350px] p-6 rounded-2xl border border-border/50 bg-card"
-              >
+              <div key={index} className="flex-shrink-0 w-[350px] p-6 rounded-2xl border border-border/50 bg-card">
                 <div className="flex gap-1 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className="w-4 h-4 fill-yellow-500 text-yellow-500"
-                    />
+                    <Star key={star} className="w-4 h-4 fill-yellow-500 text-yellow-500" />
                   ))}
                 </div>
                 <p className="text-foreground mb-6">&quot;{testimonial.quote}&quot;</p>
@@ -400,9 +361,7 @@ export function LandingPage() {
                   </div>
                   <div>
                     <div className="font-medium">{testimonial.author}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {testimonial.role}
-                    </div>
+                    <div className="text-sm text-muted-foreground">{testimonial.role}</div>
                   </div>
                 </div>
               </div>
@@ -410,7 +369,6 @@ export function LandingPage() {
           </div>
         </div>
       </section>
-
     </div>
   );
 }

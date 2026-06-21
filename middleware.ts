@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Public routes that don't require authentication
-const publicRoutes = ["/", "/login"];
+const publicRoutes = ["/", "/login", "/signup"];
 
 // Protected routes that require authentication
 const protectedRoutes = ["/dashboard", "/agent"];
@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
   const isPublicRoute = publicRoutes.includes(pathname);
 
   // If user is authenticated and trying to access login, redirect to dashboard
-  if (user && pathname === '/login') {
+  if (user && (pathname === '/login' || pathname === '/signup')) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 

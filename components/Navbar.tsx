@@ -4,7 +4,7 @@ import { useAuth } from "@/context/auth-context";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/mode-toggle";
+import { ThemeToggle } from "./ThemeToggle";
 import { LogOut, User, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
@@ -69,7 +69,7 @@ export default function Navbar() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <ModeToggle />
+                <ThemeToggle />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -83,7 +83,7 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <ModeToggle />
+              <ThemeToggle />
               <Link href="/login">
                 <Button variant="outline" size="sm" className="gap-1.5">
                   <User className="h-4 w-4" />

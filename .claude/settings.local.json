@@ -7,7 +7,8 @@
       "Skill(code-review)",
       "Skill(code-review:*)",
       "Bash(grep -E \"\\\\.tsx$\")",
-      "Bash(del \"c:\\\\Users\\\\eugen\\\\OneDrive\\\\Desktop\\\\support-hub\\\\components\\\\auth-button.tsx\")"
+      "Bash(del \"c:\\\\Users\\\\eugen\\\\OneDrive\\\\Desktop\\\\support-hub\\\\components\\\\auth-button.tsx\")",
+      "Bash(grep -E \"types\\\\.\\(ts|tsx\\)$\")"
     ],
     "deny": [],
     "ask": []

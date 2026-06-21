@@ -2,21 +2,71 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import Link from "next/link";
+
+function FloatingInput({
+  id,
+  label,
+  type = "text",
+  value,
+  onChange,
+  required,
+  suffix,
+  error,
+}: {
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+  suffix?: React.ReactNode;
+  error?: boolean;
+}) {
+  return (
+    <div className="relative">
+      <input
+        id={id}
+        type={type}
+        placeholder=" "
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        className={`peer w-full px-4 pt-5 pb-2 border rounded-lg bg-background text-foreground outline-none transition-all text-sm
+          ${suffix ? "pr-12" : ""}
+          ${error
+            ? "border-destructive focus:ring-2 focus:ring-destructive/30"
+            : "border-input focus:ring-2 focus:ring-ring/40 focus:border-foreground/40"
+          }`}
+      />
+      <label
+        htmlFor={id}
+        className={`absolute left-4 transition-all duration-150 pointer-events-none select-none
+          text-sm top-3.5
+          peer-focus:top-1.5 peer-focus:text-[11px] peer-focus:font-semibold
+          peer-[&:not(:placeholder-shown)]:top-1.5 peer-[&:not(:placeholder-shown)]:text-[11px] peer-[&:not(:placeholder-shown)]:font-semibold
+          ${error
+            ? "text-destructive"
+            : "text-muted-foreground peer-focus:text-foreground/70"
+          }`}
+      >
+        {label}{required && <span className="text-destructive ml-0.5">*</span>}
+      </label>
+      {suffix && (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">{suffix}</div>
+      )}
+    </div>
+  );
+}
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,143 +74,106 @@ export default function LoginForm() {
     setError("");
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setError(error.message);
       setIsLoading(false);
     } else {
       window.location.href = "/dashboard";
-      return;
-    }
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    if (password !== confirmPassword) {
-      setError("Passwords don't match!");
-      setIsLoading(false);
-      return;
-    }
-
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-      setIsLoading(false);
-    } else if (data.session) {
-      router.push("/dashboard");
-    } else if (data.user) {
-      setError("Check your email to confirm your account!");
-      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Customer Support Portal</CardTitle>
-          <CardDescription className="text-center">
-            {isSignUp ? "Create your account to get started" : "Sign in to your account"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={!isSignUp ? "default" : "outline"}
-              onClick={() => setIsSignUp(false)}
-              className="flex-1"
-            >
-              Sign In
-            </Button>
-            <Button
-              type="button"
-              variant={isSignUp ? "default" : "outline"}
-              onClick={() => setIsSignUp(true)}
-              className="flex-1"
-              disabled={isLoading}
-            >
-              Sign Up
-            </Button>
+    <div className="w-full max-w-sm mx-auto space-y-5">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
+        <p className="text-sm text-muted-foreground">Sign in to your SupportHub account</p>
+      </div>
+
+      <div className="bg-card border border-border rounded-2xl shadow-sm p-6 space-y-4">
+        {error && (
+          <div className="flex items-start gap-2.5 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg px-3.5 py-2.5 text-sm">
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSignIn} className="space-y-3">
+          <FloatingInput
+            id="email"
+            label="Email address"
+            type="email"
+            value={email}
+            onChange={setEmail}
+            required
+            error={!!error}
+          />
+
+          <FloatingInput
+            id="password"
+            label="Password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={setPassword}
+            required
+            error={!!error}
+            suffix={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+              </button>
+            }
+          />
+
+          <div className="flex items-center justify-between pt-0.5">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={keepSignedIn}
+                onChange={(e) => setKeepSignedIn(e.target.checked)}
+                className="w-3.5 h-3.5 rounded border-input accent-primary"
+              />
+              <span className="text-xs text-muted-foreground">Keep me signed in</span>
+            </label>
+            <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">
+              Forgot password?
+            </a>
           </div>
 
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-2.5 bg-foreground hover:bg-foreground/90 active:bg-foreground/80 text-background font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm mt-1"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Signing in…
+              </>
+            ) : "Sign in"}
+          </button>
+        </form>
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="confirmPass">Confirm Password</Label>
-                <Input
-                  id="confirmPass"
-                  type="password"
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-              </div>
-            )}
-
-            {error && (
-              <div className={`text-sm ${error.includes("Check your email") ? "text-green-600" : "text-destructive"}`}>
-                {error}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              onClick={isSignUp ? handleSignUp : handleSignIn}
-              disabled={isLoading}
-              className="w-full"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : isSignUp ? (
-                "Create Account"
-              ) : (
-                "Sign In"
-              )}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      <div className="bg-card border border-border rounded-xl p-5 text-center space-y-2.5">
+        <p className="text-[11px] font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase">
+          New to SupportHub?
+        </p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Create an account to track tickets and get faster support.
+        </p>
+        <Link
+          href="/signup"
+          className="inline-block px-6 py-2 border border-border text-foreground font-semibold rounded-full text-xs hover:bg-muted transition-colors"
+        >
+          Join now
+        </Link>
+      </div>
     </div>
   );
 }

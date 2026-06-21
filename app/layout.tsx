@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/auth-context";
 import { getUserProfile } from "@/lib/auth";
-import Navbar from "@/components/Navbar";
 import "./globals.css";
-import Footer from "@/components/Footer";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
 
 export const metadata: Metadata = {
   title: "SupportHub - Modern Customer Support Platform",
@@ -19,9 +18,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider user={user} profile={profile}>
-            <Navbar />
+            <ConditionalNavbar />
             {children}
-            <Footer />
           </AuthProvider>
         </ThemeProvider>
       </body>
