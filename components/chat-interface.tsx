@@ -380,7 +380,7 @@ export default function ChatInterface({ ticketId, userId, userRole, onClose, cla
               onKeyDown={handleKeyDown}
               placeholder="Aa"
               rows={1}
-              disabled={isSending}
+              autoFocus
               className="flex-1 bg-transparent resize-none outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 max-h-[120px] overflow-y-auto leading-relaxed self-center"
             />
           </div>

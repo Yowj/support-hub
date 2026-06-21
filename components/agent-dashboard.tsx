@@ -185,8 +185,22 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
       )
       .subscribe();
 
+    // Secondary listener for new tickets created by customers.
+    // postgres_changes (above) handles UPDATE/DELETE reliably, but INSERT events
+    // from other users are blocked by Supabase Realtime's RLS evaluation on complex
+    // cross-table policies. The customer sends a broadcast from new-ticket-form.tsx
+    // after creating a ticket, and we pick it up here to trigger a fresh fetch.
+    const broadcastChannel = supabase
+      .channel("support-hub:tickets")
+      .on("broadcast", { event: "ticket-created" }, () => {
+        fetchTickets();
+        fetchStats();
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(broadcastChannel);
     };
   }, [filter, fetchTickets, fetchStats, supabase]);
 
