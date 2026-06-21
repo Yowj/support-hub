@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { MessageSquare, Zap, Shield, Clock, Users, BarChart3, ArrowRight, Star, Sparkles } from "lucide-react";
 
 export function LandingPage() {
@@ -20,7 +20,7 @@ export function LandingPage() {
               <span className="text-lg font-semibold tracking-tight">SupportHub</span>
             </div>
             <div className="flex items-center gap-3">
-              <ModeToggle />
+              <ThemeToggle />
               <Link href="/login">
                 <Button variant="ghost" size="sm">
                   Log in

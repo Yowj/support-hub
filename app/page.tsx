@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Zap, Shield, Clock, Users, BarChart3, ArrowRight, Star, Sparkles } from "lucide-react";
 
-export function LandingPage() {
+function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Hero Section */}
