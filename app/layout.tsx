@@ -1,9 +1,31 @@
 import type { Metadata } from "next";
+import { Inter, Instrument_Serif, Fragment_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/auth-context";
 import { getUserProfile } from "@/lib/auth";
 import "./globals.css";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
+  display: "swap",
+});
+
+const fragmentMono = Fragment_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-fragment-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "SupportHub - Modern Customer Support Platform",
@@ -14,7 +36,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { user, profile } = await getUserProfile();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${instrumentSerif.variable} ${fragmentMono.variable}`}
+    >
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider user={user} profile={profile}>

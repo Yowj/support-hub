@@ -12,6 +12,7 @@ export default {
     extend: {
       fontFamily: {
         sans: [
+          "var(--font-inter)",
           "Inter",
           "system-ui",
           "-apple-system",
@@ -22,8 +23,16 @@ export default {
           "Arial",
           "sans-serif",
         ],
+        serif: ["var(--font-instrument-serif)", "Georgia", "serif"],
+        mono: ["var(--font-fragment-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       colors: {
+        brand: {
+          DEFAULT: "hsl(var(--brand))",
+          from: "hsl(var(--brand-from))",
+          to: "hsl(var(--brand-to))",
+          cyan: "hsl(var(--brand-cyan))",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -71,12 +80,22 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       animation: {
-        marquee: "marquee 30s linear infinite",
+        marquee: "marquee 40s linear infinite",
+        "gradient-pan": "gradient-pan 8s ease-in-out infinite",
+        float: "float 7s ease-in-out infinite",
       },
       keyframes: {
         marquee: {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
+        },
+        "gradient-pan": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
         },
       },
     },
