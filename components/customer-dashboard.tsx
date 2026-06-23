@@ -1,12 +1,14 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence, useAnimationControls } from "framer-motion";
+import { useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import { AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import NewTicketForm from "./new-ticket-form";
 import ChatInterface from "./chat-interface";
-import type { User } from "@supabase/supabase-js";
+import TicketRow from "@/app/dashboard/_components/TicketRow";
+import { useCustomerTickets } from "@/app/dashboard/_hooks/use-customer-tickets";
+import type { CustomerFilter } from "@/lib/tickets/queries";
 import {
   Search,
   Inbox,
@@ -14,220 +16,30 @@ import {
   CheckCircle,
   PlusCircle,
   MessageSquare,
-  Hash,
 } from "lucide-react";
-
-interface Ticket {
-  id: string;
-  subject: string;
-  status: "open" | "in_progress" | "resolved" | "closed";
-  priority: "low" | "medium" | "high" | "urgent";
-  created_at: string;
-  updated_at: string;
-}
-
-interface Stats {
-  all: number;
-  open: number;
-  active: number;
-  resolved: number;
-}
 
 interface CustomerDashboardProps {
   user: User;
 }
 
-const PRIORITY_DOT: Record<string, string> = {
-  urgent: "bg-red-500",
-  high: "bg-orange-400",
-  medium: "bg-blue-400",
-  low: "bg-muted-foreground/40",
-};
-
-const STATUS_CHIP: Record<string, string> = {
-  open: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
-  in_progress: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  resolved: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  closed: "bg-muted text-muted-foreground",
-};
-
-const STATUS_ICON_BG: Record<string, string> = {
-  open: "from-red-400 to-rose-500",
-  in_progress: "from-amber-400 to-orange-500",
-  resolved: "from-emerald-400 to-teal-500",
-  closed: "from-gray-300 to-gray-400",
-};
-
-function getRelativeTime(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString([], { month: "short", day: "numeric" });
-}
-
 type ViewMode = "list" | "new-ticket";
 
-interface TicketRowProps {
-  ticket: Ticket;
-  isSelected: boolean;
-  onClick: () => void;
-}
-
-const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick }: TicketRowProps) {
-  const flashControls = useAnimationControls();
-  const isFirstRender = useRef(true);
-
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    flashControls.start({
-      backgroundColor: ["rgba(59,130,246,0.15)", "rgba(59,130,246,0)"],
-      transition: { duration: 1.2, ease: "easeOut" },
-    });
-  }, [ticket.updated_at, flashControls]);
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      style={{ overflow: "hidden" }}
-      onClick={onClick}
-      className={`group relative flex items-start gap-2.5 px-3 py-3 cursor-pointer border-l-2 transition-colors ${
-        isSelected ? "bg-accent border-l-primary" : "border-l-transparent hover:bg-accent/50"
-      }`}
-    >
-      <motion.div className="absolute inset-0 pointer-events-none" animate={flashControls} />
-      <div
-        className={`w-8 h-8 rounded-full bg-gradient-to-br ${STATUS_ICON_BG[ticket.status] || "from-gray-300 to-gray-400"} flex items-center justify-center flex-shrink-0 shadow-sm`}
-      >
-        <Hash className="h-3.5 w-3.5 text-white" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="mb-0.5">
-          <span className="text-xs font-medium truncate block text-foreground">
-            {ticket.subject}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span
-            className={`text-xs px-1.5 py-0.5 rounded-full font-medium capitalize ${
-              STATUS_CHIP[ticket.status] || "bg-muted text-muted-foreground"
-            }`}
-          >
-            {ticket.status.replace("_", " ")}
-          </span>
-          <span className="text-xs text-muted-foreground">{getRelativeTime(ticket.created_at)}</span>
-        </div>
-      </div>
-      <div
-        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
-          PRIORITY_DOT[ticket.priority] || "bg-gray-300"
-        }`}
-        title={`Priority: ${ticket.priority}`}
-      />
-    </motion.div>
-  );
-});
-
 export default function CustomerDashboard({ user }: CustomerDashboardProps) {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [stats, setStats] = useState<Stats>({ all: 0, open: 0, active: 0, resolved: 0 });
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "open" | "active" | "resolved">("all");
+  const [filter, setFilter] = useState<CustomerFilter>("all");
   const [search, setSearch] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const supabase = createClient();
 
-  const fetchStats = useCallback(async () => {
-    const { data } = await supabase
-      .from("support_tickets")
-      .select("status")
-      .eq("customer_id", user.id);
-    if (!data) return;
-    setStats({
-      all: data.length,
-      open: data.filter((t) => t.status === "open").length,
-      active: data.filter((t) => t.status === "in_progress").length,
-      resolved: data.filter((t) => t.status === "resolved" || t.status === "closed").length,
-    });
-  }, [user.id, supabase]);
-
-  const fetchTickets = useCallback(async (background = false) => {
-    if (!background) setIsLoading(true);
-    try {
-      let query = supabase
-        .from("support_tickets")
-        .select("*")
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
-
-      switch (filter) {
-        case "open":
-          query = query.eq("status", "open");
-          break;
-        case "active":
-          query = query.eq("status", "in_progress");
-          break;
-        case "resolved":
-          query = query.in("status", ["resolved", "closed"]);
-          break;
-      }
-
-      const { data, error } = await query;
-      if (error) {
-        console.error("Error fetching tickets:", error);
-        return;
-      }
-      setTickets(data || []);
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-    } finally {
-      if (!background) setIsLoading(false);
-    }
-  }, [filter, user.id, supabase]);
-
-  useEffect(() => {
-    fetchTickets();
-    fetchStats();
-
-    const channel = supabase
-      .channel("customer-tickets")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "support_tickets",
-          filter: `customer_id=eq.${user.id}`,
-        },
-        () => {
-          fetchTickets(true);
-          fetchStats();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [filter, fetchTickets, fetchStats, user.id, supabase]);
+  const { tickets, stats, isLoading, refreshTickets, refreshStats } = useCustomerTickets(
+    user.id,
+    filter
+  );
 
   const handleTicketCreated = (ticketId: string) => {
     setViewMode("list");
     setSelectedTicketId(ticketId);
-    fetchTickets(true);
-    fetchStats();
+    refreshTickets(true);
+    refreshStats();
   };
 
   const filteredTickets = tickets.filter(

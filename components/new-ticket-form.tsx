@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { createTicket } from "@/lib/tickets/queries";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,48 +35,16 @@ export default function NewTicketForm({ userId, onTicketCreated }: NewTicketForm
     setError("");
 
     try {
-      const { data: ticket, error: ticketError } = await supabase
-        .from("support_tickets")
-        .insert([
-          {
-            customer_id: userId,
-            subject: subject.trim(),
-            priority,
-            status: "open",
-          },
-        ])
-        .select()
-        .single();
-
-      if (ticketError) throw ticketError;
-
-      const { error: messageError } = await supabase
-        .from("chat_messages")
-        .insert([
-          {
-            ticket_id: ticket.id,
-            sender_id: userId,
-            sender_type: "customer",
-            message: message.trim(),
-          },
-        ]);
-
-      if (messageError) throw messageError;
-
-      // Notify agent dashboard in real-time that a new ticket was created.
-      // We use Supabase Broadcast instead of relying on postgres_changes because
-      // the agent's SELECT RLS policy uses a cross-table EXISTS subquery, which
-      // Supabase Realtime may not evaluate correctly for INSERT events from other users.
-      // Broadcast bypasses RLS entirely — all subscribers on this channel receive it.
-      await supabase.channel('support-hub:tickets').send({
-        type: 'broadcast',
-        event: 'ticket-created',
-        payload: { ticketId: ticket.id },
+      const ticketId = await createTicket(supabase, {
+        userId,
+        subject: subject.trim(),
+        message: message.trim(),
+        priority,
       });
 
       setSubject("");
       setMessage("");
-      onTicketCreated(ticket.id);
+      onTicketCreated(ticketId);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to create ticket");
     } finally {

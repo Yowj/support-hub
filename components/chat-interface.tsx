@@ -4,25 +4,14 @@ import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Send, MessageCircle, AlertCircle, Loader2 } from "lucide-react";
-
-interface Message {
-  id: string;
-  ticket_id: string;
-  sender_id: string;
-  sender_type: "customer" | "agent" | "system";
-  message: string;
-  timestamp: string;
-  read_at: string | null;
-}
-
-interface Ticket {
-  id: string;
-  subject: string;
-  status: "open" | "in_progress" | "resolved" | "closed";
-  priority: "low" | "medium" | "high" | "urgent";
-  created_at: string;
-  agent_id: string | null;
-}
+import type { Message, Ticket } from "@/types/ticket";
+import {
+  getInitials,
+  formatTime,
+  formatDate,
+  getStatusStyle,
+  getPriorityStyle,
+} from "@/lib/tickets/format";
 
 interface ChatInterfaceProps {
   ticketId: string;
@@ -36,49 +25,6 @@ const CONTACT_NAME: Record<"customer" | "agent", string> = {
   customer: "Support Agent",
   agent: "Customer",
 };
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function formatTime(timestamp: string) {
-  return new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
-function formatDate(timestamp: string) {
-  const date = new Date(timestamp);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  if (date.toDateString() === today.toDateString()) return "Today";
-  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
-  return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
-}
-
-function getStatusStyle(status: string) {
-  switch (status) {
-    case "open": return "bg-red-100 text-red-700 border-red-200";
-    case "in_progress": return "bg-amber-100 text-amber-700 border-amber-200";
-    case "resolved": return "bg-emerald-100 text-emerald-700 border-emerald-200";
-    case "closed": return "bg-gray-100 text-gray-600 border-gray-200";
-    default: return "bg-gray-100 text-gray-600 border-gray-200";
-  }
-}
-
-function getPriorityStyle(priority: string) {
-  switch (priority) {
-    case "urgent": return "bg-red-100 text-red-700 border-red-200";
-    case "high": return "bg-orange-100 text-orange-700 border-orange-200";
-    case "medium": return "bg-blue-100 text-blue-700 border-blue-200";
-    case "low": return "bg-gray-100 text-gray-600 border-gray-200";
-    default: return "bg-gray-100 text-gray-600 border-gray-200";
-  }
-}
 
 export default function ChatInterface({ ticketId, userId, userRole, onClose, className }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);

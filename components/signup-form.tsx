@@ -5,61 +5,8 @@ import { useState } from "react";
 import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-function FloatingInput({
-  id,
-  label,
-  type = "text",
-  value,
-  onChange,
-  required,
-  suffix,
-  error,
-}: {
-  id: string;
-  label: string;
-  type?: string;
-  value: string;
-  onChange: (v: string) => void;
-  required?: boolean;
-  suffix?: React.ReactNode;
-  error?: boolean;
-}) {
-  return (
-    <div className="relative">
-      <input
-        id={id}
-        type={type}
-        placeholder=" "
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-        className={`peer w-full px-4 pt-5 pb-2 border rounded-lg bg-background text-foreground outline-none transition-all text-sm
-          ${suffix ? "pr-12" : ""}
-          ${error
-            ? "border-destructive focus:ring-2 focus:ring-destructive/30"
-            : "border-input focus:ring-2 focus:ring-ring/40 focus:border-foreground/40"
-          }`}
-      />
-      <label
-        htmlFor={id}
-        className={`absolute left-4 transition-all duration-150 pointer-events-none select-none
-          text-sm top-3.5
-          peer-focus:top-1.5 peer-focus:text-[11px] peer-focus:font-semibold
-          peer-[&:not(:placeholder-shown)]:top-1.5 peer-[&:not(:placeholder-shown)]:text-[11px] peer-[&:not(:placeholder-shown)]:font-semibold
-          ${error
-            ? "text-destructive"
-            : "text-muted-foreground peer-focus:text-foreground/70"
-          }`}
-      >
-        {label}{required && <span className="text-destructive ml-0.5">*</span>}
-      </label>
-      {suffix && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">{suffix}</div>
-      )}
-    </div>
-  );
-}
+import AuthInput from "@/components/shared/AuthInput";
+import OAuthButtons from "@/components/shared/OAuthButtons";
 
 function getPasswordStrength(pw: string): number {
   let score = 0;
@@ -117,7 +64,7 @@ export default function SignupForm() {
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto space-y-5">
+    <div className="w-full max-w-sm mx-auto space-y-5 animate-fade-in-up">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold text-foreground">Create an account</h1>
         <p className="text-sm text-muted-foreground">Join SupportHub to get started</p>
@@ -138,8 +85,18 @@ export default function SignupForm() {
           </div>
         )}
 
+        <OAuthButtons onError={(msg) => { setIsError(true); setMessage(msg); }} />
+
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
+            or
+          </span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
         <form onSubmit={handleSignUp} className="space-y-3">
-          <FloatingInput
+          <AuthInput
             id="email"
             label="Email address"
             type="email"
@@ -149,7 +106,7 @@ export default function SignupForm() {
           />
 
           <div className="space-y-1.5">
-            <FloatingInput
+            <AuthInput
               id="password"
               label="Password"
               type={showPassword ? "text" : "password"}
@@ -190,7 +147,7 @@ export default function SignupForm() {
           </div>
 
           <div className="space-y-1">
-            <FloatingInput
+            <AuthInput
               id="confirm-password"
               label="Confirm password"
               type={showConfirm ? "text" : "password"}
