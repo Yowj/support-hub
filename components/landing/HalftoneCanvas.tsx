@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type P5Type from "p5";
 
 const TONEMAKI_COLORS = [
   "#75ff9c", "#103729", "#bbbaad", "#141414",
@@ -15,13 +16,14 @@ export default function HalftoneCanvas() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    let p5Instance: import("p5") | null = null;
+    let p5Instance: P5Type | null = null;
+    let cleanupListeners: (() => void) | null = null;
     let cancelled = false;
 
     import("p5").then(({ default: P5 }) => {
       if (cancelled || !containerRef.current) return;
 
-      p5Instance = new P5((p: import("p5")) => {
+      p5Instance = new P5((p: P5Type) => {
         let w: number, h: number;
         let rows = 40;
         let columns = 60;
@@ -34,7 +36,7 @@ export default function HalftoneCanvas() {
         const xWaveSpeed = 0.5;
         const xWaveOffset = 1;
         const animationPeriod = 5;
-        const fadeDuration = 6000;
+        const fadeDuration = 100;
         let fadeProgress = 0;
         let startTime: number;
         let inactivityTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -68,7 +70,7 @@ export default function HalftoneCanvas() {
           window.addEventListener("mousemove", handleUserInteraction);
           window.addEventListener("scroll", handleUserInteraction);
 
-          (p as any)._cleanupListeners = () => {
+          cleanupListeners = () => {
             window.removeEventListener("mousemove", handleUserInteraction);
             window.removeEventListener("scroll", handleUserInteraction);
             if (inactivityTimeout) clearTimeout(inactivityTimeout);
@@ -128,8 +130,8 @@ export default function HalftoneCanvas() {
 
     return () => {
       cancelled = true;
+      cleanupListeners?.();
       if (p5Instance) {
-        (p5Instance as any)._cleanupListeners?.();
         p5Instance.remove();
       }
     };

@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import Eyebrow from "./Eyebrow";
+import { Reveal, RevealGroup, RevealItem } from "./Reveal";
 
 const checklist = [
   "Unified timeline across every channel",
@@ -18,7 +19,7 @@ export default function FeatureHighlight() {
     <section id="features" className="py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <div>
+          <Reveal>
             <Eyebrow>One shared inbox</Eyebrow>
             <h2 className="mt-4 text-balance text-3xl sm:text-4xl font-semibold tracking-tight">
               Every conversation,{" "}
@@ -41,14 +42,14 @@ export default function FeatureHighlight() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Reveal>
 
           {/* Stacked clip-style cards */}
           <div className="relative">
             <div className="absolute -inset-6 -z-10 brand-glow opacity-60" />
-            <div className="space-y-3">
+            <RevealGroup className="space-y-3" delay={0.15}>
               {rows.map((row, i) => (
-                <div
+                <RevealItem
                   key={i}
                   className={`flex items-center gap-4 rounded-xl border border-border/60 bg-card p-4 shadow-sm ${
                     i === 2 ? "ring-1 ring-brand/40 animate-pulse-ring" : ""
@@ -65,9 +66,9 @@ export default function FeatureHighlight() {
                   <span className="font-mono text-xs text-muted-foreground">
                     {row.time}
                   </span>
-                </div>
+                </RevealItem>
               ))}
-            </div>
+            </RevealGroup>
           </div>
         </div>
       </div>

@@ -1,11 +1,12 @@
 import Eyebrow from "./Eyebrow";
 import { features } from "./landing-data";
+import { Reveal, RevealGroup, RevealItem } from "./Reveal";
 
 export default function FeatureGrid() {
   return (
     <section className="border-t border-border/50 bg-muted/30 py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="mx-auto mb-16 max-w-2xl text-center">
+        <Reveal className="mx-auto mb-16 max-w-2xl text-center">
           <Eyebrow>Everything included</Eyebrow>
           <h2 className="mt-4 text-balance text-3xl sm:text-4xl font-semibold tracking-tight">
             Built for teams that want to{" "}
@@ -17,11 +18,11 @@ export default function FeatureGrid() {
           <p className="mt-4 text-lg text-muted-foreground">
             Powerful features that help your team work smarter, not harder.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 md:grid-cols-2 lg:grid-cols-3">
+        <RevealGroup className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/60 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
-            <div
+            <RevealItem
               key={index}
               className="group bg-card p-8 transition-colors hover:bg-accent/40"
             >
@@ -32,9 +33,9 @@ export default function FeatureGrid() {
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {feature.description}
               </p>
-            </div>
+            </RevealItem>
           ))}
-        </div>
+        </RevealGroup>
       </div>
     </section>
   );

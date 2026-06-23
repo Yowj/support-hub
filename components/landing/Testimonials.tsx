@@ -1,11 +1,12 @@
 import { Star } from "lucide-react";
 import Eyebrow from "./Eyebrow";
 import { testimonials } from "./landing-data";
+import { Reveal } from "./Reveal";
 
 export default function Testimonials() {
   return (
     <section id="testimonials" className="overflow-hidden border-t border-border/50 py-24 lg:py-32">
-      <div className="mx-auto mb-16 max-w-2xl px-6 text-center lg:px-8">
+      <Reveal className="mx-auto mb-16 max-w-2xl px-6 text-center lg:px-8">
         <Eyebrow>Loved by support teams</Eyebrow>
         <h2 className="mt-4 text-balance text-3xl sm:text-4xl font-semibold tracking-tight">
           Don&apos;t just take our{" "}
@@ -13,7 +14,7 @@ export default function Testimonials() {
             word for it
           </span>
         </h2>
-      </div>
+      </Reveal>
 
       <div className="relative">
         <div className="pointer-events-none absolute left-0 top-0 bottom-0 z-10 w-24 bg-gradient-to-r from-background to-transparent" />

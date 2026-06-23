@@ -2,10 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Eyebrow from "./Eyebrow";
+import { Reveal } from "./Reveal";
 
 export default function ClosingCta() {
   return (
-    <section className="px-6 pb-24 lg:px-8 lg:pb-32">
+    <Reveal className="px-6 pb-24 lg:px-8 lg:pb-32">
       <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl border border-border/60 bg-card px-6 py-16 text-center sm:py-20">
         <div className="absolute inset-x-0 top-0 -z-0 h-full brand-glow opacity-70" />
         <div className="relative z-10">
@@ -38,6 +39,6 @@ export default function ClosingCta() {
           </div>
         </div>
       </div>
-    </section>
+    </Reveal>
   );
 }

@@ -1,11 +1,12 @@
 import Eyebrow from "./Eyebrow";
 import { teams } from "./landing-data";
+import { Reveal, RevealGroup, RevealItem } from "./Reveal";
 
 export default function TeamsGrid() {
   return (
     <section className="border-t border-border/50 py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="mx-auto mb-16 max-w-2xl text-center">
+        <Reveal className="mx-auto mb-16 max-w-2xl text-center">
           <Eyebrow>However you support</Eyebrow>
           <h2 className="mt-4 text-balance text-3xl sm:text-4xl font-semibold tracking-tight">
             Made for every kind of team
@@ -14,11 +15,11 @@ export default function TeamsGrid() {
             From a two-person startup to a global enterprise, SupportHub bends
             to the way you already work.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <RevealGroup className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {teams.map((team, index) => (
-            <div
+            <RevealItem
               key={index}
               className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-8 transition-all hover:border-brand/40"
             >
@@ -27,9 +28,9 @@ export default function TeamsGrid() {
               </div>
               <h3 className="mb-2 text-xl font-semibold">{team.title}</h3>
               <p className="text-muted-foreground">{team.description}</p>
-            </div>
+            </RevealItem>
           ))}
-        </div>
+        </RevealGroup>
       </div>
     </section>
   );
