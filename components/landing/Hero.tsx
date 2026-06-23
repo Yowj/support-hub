@@ -7,7 +7,7 @@ export default function Hero() {
     <section className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28">
       {/* Ambient brand glow + dotted texture */}
       <div className="absolute inset-0 -z-10 bg-dot-grid [mask-image:radial-gradient(70%_60%_at_50%_0%,black,transparent)]" />
-      <div className="absolute inset-x-0 top-0 -z-10 h-[600px] brand-glow" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-[600px] brand-glow animate-breathe" />
 
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
@@ -57,7 +57,7 @@ export default function Hero() {
 
         {/* App-window mockup */}
         <div className="relative mt-16 lg:mt-20 animate-fade-in-up animation-delay-600">
-          <div className="relative mx-auto max-w-5xl">
+          <div className="relative mx-auto max-w-5xl animate-float">
             <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-2xl shadow-brand/10 ring-1 ring-black/5">
               {/* Window chrome */}
               <div className="flex items-center gap-2 border-b border-border/60 bg-muted/40 px-4 py-3">
@@ -132,6 +132,15 @@ export default function Hero() {
                         <div className="h-8 w-8 flex-shrink-0 rounded-full bg-muted" />
                         <div className="max-w-xs rounded-lg rounded-tl-none bg-muted p-3">
                           <div className="h-2 w-40 rounded bg-foreground/10" />
+                        </div>
+                      </div>
+                      {/* Typing indicator — AI composing a reply */}
+                      <div className="flex gap-3">
+                        <div className="h-8 w-8 flex-shrink-0 rounded-full bg-brand/15" />
+                        <div className="flex items-center gap-1.5 rounded-lg rounded-tl-none bg-brand/10 px-3 py-3">
+                          <span className="h-1.5 w-1.5 rounded-full bg-brand/70 animate-typing-dot" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-brand/70 animate-typing-dot [animation-delay:200ms]" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-brand/70 animate-typing-dot [animation-delay:400ms]" />
                         </div>
                       </div>
                     </div>

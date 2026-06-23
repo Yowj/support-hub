@@ -51,7 +51,7 @@ export default function FeatureHighlight() {
                 <div
                   key={i}
                   className={`flex items-center gap-4 rounded-xl border border-border/60 bg-card p-4 shadow-sm ${
-                    i === 2 ? "ring-1 ring-brand/40" : ""
+                    i === 2 ? "ring-1 ring-brand/40 animate-pulse-ring" : ""
                   }`}
                 >
                   <span
