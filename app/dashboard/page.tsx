@@ -1,5 +1,5 @@
 import { getUserProfile, ensureUserProfile } from "@/lib/auth";
-import CustomerDashboard from "@/components/customer-dashboard";
+import CustomerDashboard from "@/app/dashboard/_components/CustomerDashboard";
 import { redirect } from "next/navigation";
 
 export default async function Dashboard() {

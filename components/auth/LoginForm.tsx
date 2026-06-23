@@ -4,10 +4,12 @@ import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import AuthInput from "@/components/shared/AuthInput";
 import OAuthButtons from "@/components/shared/OAuthButtons";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,7 +29,8 @@ export default function LoginForm() {
       setError(error.message);
       setIsLoading(false);
     } else {
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
+      router.refresh();
     }
   };
 
@@ -97,9 +100,9 @@ export default function LoginForm() {
               />
               <span className="text-xs text-muted-foreground">Keep me signed in</span>
             </label>
-            <a href="#" className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium">
+            <Link href="#" className="text-xs text-brand hover:underline font-medium">
               Forgot password?
-            </a>
+            </Link>
           </div>
 
           <button
@@ -118,7 +121,7 @@ export default function LoginForm() {
       </div>
 
       <div className="bg-card border border-border rounded-xl p-5 text-center space-y-2.5">
-        <p className="text-[11px] font-bold tracking-widest text-blue-600 dark:text-blue-400 uppercase">
+        <p className="text-[11px] font-bold tracking-widest text-brand uppercase">
           New to SupportHub?
         </p>
         <p className="text-xs text-muted-foreground leading-relaxed">

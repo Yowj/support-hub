@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { createTicket } from "@/lib/tickets/queries";
+import type { TicketPriority } from "@/types/ticket";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,7 @@ interface NewTicketFormProps {
 export default function NewTicketForm({ userId, onTicketCreated }: NewTicketFormProps) {
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
+  const [priority, setPriority] = useState<TicketPriority>("medium");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -79,7 +80,7 @@ export default function NewTicketForm({ userId, onTicketCreated }: NewTicketForm
             <Select
               id="priority"
               value={priority}
-              onChange={(e) => setPriority(e.target.value as "low" | "medium" | "high" | "urgent")}
+              onChange={(e) => setPriority(e.target.value as TicketPriority)}
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -101,7 +102,7 @@ export default function NewTicketForm({ userId, onTicketCreated }: NewTicketForm
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm">{error}</div>
+            <div className="text-destructive text-sm">{error}</div>
           )}
 
           <Button type="submit" disabled={isSubmitting} className="w-full">

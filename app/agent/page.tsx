@@ -1,5 +1,5 @@
 import { getUserProfile, ensureUserProfile } from "@/lib/auth";
-import AgentDashboard from "@/components/agent-dashboard";
+import AgentDashboard from "@/app/agent/_components/AgentDashboard";
 import { redirect } from "next/navigation";
 
 export default async function AgentPage() {
