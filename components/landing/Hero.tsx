@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import HalftoneCanvas from "@/components/landing/HalftoneCanvas";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28">
+    <section className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28 bg-[#141414]">
+      {/* Halftone animated dots — ported from landing.html */}
+      <HalftoneCanvas />
       {/* Ambient brand glow + dotted texture */}
       <div className="absolute inset-0 -z-10 bg-dot-grid [mask-image:radial-gradient(70%_60%_at_50%_0%,black,transparent)]" />
       <div className="absolute inset-x-0 top-0 -z-10 h-[600px] brand-glow animate-breathe" />
