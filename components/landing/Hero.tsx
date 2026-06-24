@@ -5,7 +5,7 @@ import HalftoneCanvas from "@/components/landing/HalftoneCanvas";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28 bg-[#141414]">
+    <section className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28 bg-background dark:bg-[#141414] dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-brand/10 dark:via-transparent dark:to-transparent">
       {/* Halftone animated dots — ported from landing.html */}
       <HalftoneCanvas />
       {/* Ambient brand glow + dotted texture */}

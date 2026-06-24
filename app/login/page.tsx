@@ -3,7 +3,6 @@ import Image from "next/image";
 
 export default function Login() {
   return (
-    <main className="min-h-screen bg-background">
       <div className="grid xl:grid-cols-2 grid-cols-1 min-h-screen">
         <div className="flex items-start justify-center bg-muted/30 pt-28 px-6 pb-12">
           <LoginForm />
@@ -20,6 +19,5 @@ export default function Login() {
           />
         </div>
       </div>
-    </main>
   );
 }

@@ -35,7 +35,7 @@ export default function HalftoneCanvas() {
         const xWaveLength = 5;
         const xWaveSpeed = 0.5;
         const xWaveOffset = 1;
-        const animationPeriod = 5;
+        const animationPeriod = 500;
         const fadeDuration = 100;
         let fadeProgress = 0;
         let startTime: number;

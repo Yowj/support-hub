@@ -9,6 +9,7 @@ import ClosingCta from "@/components/landing/ClosingCta";
 import LandingFooter from "@/components/landing/LandingFooter";
 
 export default function LandingPage() {
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Hero />
