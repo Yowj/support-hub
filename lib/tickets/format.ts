@@ -2,28 +2,31 @@ import type { TicketStatus, TicketPriority } from "@/types/ticket";
 
 /** Tailwind classes for the small priority dot shown on ticket rows. */
 export const PRIORITY_DOT: Record<TicketPriority, string> = {
-  urgent: "bg-red-500",
-  high: "bg-orange-400",
-  medium: "bg-blue-400",
+  urgent: "bg-danger",
+  high: "bg-warning",
+  medium: "bg-info",
   low: "bg-muted-foreground/40",
 };
 
 /** Tailwind classes for the status chip shown on ticket rows. */
 export const STATUS_CHIP: Record<TicketStatus, string> = {
-  open: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
-  in_progress: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  resolved: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  open: "bg-danger/15 text-danger",
+  in_progress: "bg-warning/15 text-warning",
+  resolved: "bg-success/15 text-success",
   closed: "bg-muted text-muted-foreground",
 };
 
-/** Gradient backgrounds keyed by status, used for the customer ticket avatar. */
+/** Decorative gradient backgrounds keyed by status, used for the customer
+ *  ticket avatar. These are identity/decoration (not semantic signal), so
+ *  they intentionally use the multi-hue palette rather than signal tokens. */
 export const STATUS_ICON_BG: Record<TicketStatus, string> = {
   open: "from-red-400 to-rose-500",
   in_progress: "from-amber-400 to-orange-500",
   resolved: "from-emerald-400 to-teal-500",
-  closed: "from-gray-300 to-gray-400",
+  closed: "from-muted-foreground/40 to-muted-foreground/60",
 };
 
+/** Decorative per-user avatar gradients — identity coloring, not signal. */
 const AVATAR_COLORS = [
   "from-indigo-400 to-purple-500",
   "from-blue-400 to-cyan-500",
@@ -84,21 +87,21 @@ export function formatDate(timestamp: string): string {
 /** Border + background classes for the status badge in the chat header. */
 export function getStatusStyle(status: string): string {
   switch (status) {
-    case "open": return "bg-red-100 text-red-700 border-red-200";
-    case "in_progress": return "bg-amber-100 text-amber-700 border-amber-200";
-    case "resolved": return "bg-emerald-100 text-emerald-700 border-emerald-200";
-    case "closed": return "bg-gray-100 text-gray-600 border-gray-200";
-    default: return "bg-gray-100 text-gray-600 border-gray-200";
+    case "open": return "bg-danger/15 text-danger border-danger/30";
+    case "in_progress": return "bg-warning/15 text-warning border-warning/30";
+    case "resolved": return "bg-success/15 text-success border-success/30";
+    case "closed": return "bg-muted text-muted-foreground border-border";
+    default: return "bg-muted text-muted-foreground border-border";
   }
 }
 
 /** Border + background classes for the priority badge in the chat header. */
 export function getPriorityStyle(priority: string): string {
   switch (priority) {
-    case "urgent": return "bg-red-100 text-red-700 border-red-200";
-    case "high": return "bg-orange-100 text-orange-700 border-orange-200";
-    case "medium": return "bg-blue-100 text-blue-700 border-blue-200";
-    case "low": return "bg-gray-100 text-gray-600 border-gray-200";
-    default: return "bg-gray-100 text-gray-600 border-gray-200";
+    case "urgent": return "bg-danger/15 text-danger border-danger/30";
+    case "high": return "bg-warning/15 text-warning border-warning/30";
+    case "medium": return "bg-info/15 text-info border-info/30";
+    case "low": return "bg-muted text-muted-foreground border-border";
+    default: return "bg-muted text-muted-foreground border-border";
   }
 }

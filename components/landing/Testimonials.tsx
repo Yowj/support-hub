@@ -30,7 +30,7 @@ export default function Testimonials() {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    className="h-4 w-4 fill-warning text-warning"
                   />
                 ))}
               </div>

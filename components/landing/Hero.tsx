@@ -5,7 +5,7 @@ import HalftoneCanvas from "@/components/landing/HalftoneCanvas";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28 bg-background dark:bg-[#141414] dark:bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] dark:from-brand/10 dark:via-transparent dark:to-transparent">
+    <section className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28 bg-background">
       {/* Halftone animated dots — ported from landing.html */}
       <HalftoneCanvas />
       {/* Ambient brand glow + dotted texture */}
@@ -42,7 +42,7 @@ export default function Hero() {
             <Link href="/login">
               <Button
                 size="lg"
-                className="h-12 px-7 text-base gap-2 bg-brand-gradient text-white border-0 shadow-lg shadow-brand/25 hover:opacity-95 hover:shadow-brand/40 transition"
+                className="h-12 px-7 text-base gap-2 bg-brand-gradient text-on-brand border-0 shadow-lg shadow-brand/25 hover:opacity-95 hover:shadow-brand/40 transition"
               >
                 Start free trial
                 <ArrowRight className="w-4 h-4" />
@@ -61,9 +61,10 @@ export default function Hero() {
         {/* App-window mockup */}
         <div className="relative mt-16 lg:mt-20 animate-fade-in-up animation-delay-600">
           <div className="relative mx-auto max-w-5xl animate-float">
-            <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-2xl shadow-brand/10 ring-1 ring-black/5">
+            <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-2xl shadow-brand/10 ring-1 ring-foreground/5">
               {/* Window chrome */}
               <div className="flex items-center gap-2 border-b border-border/60 bg-muted/40 px-4 py-3">
+                {/* macOS traffic-light dots — fixed window-chrome metaphor, not themeable signal */}
                 <div className="flex gap-1.5">
                   <div className="h-3 w-3 rounded-full bg-red-500/80" />
                   <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
@@ -112,7 +113,7 @@ export default function Hero() {
                           <div className="mt-1 h-2 w-16 rounded bg-muted-foreground/25" />
                         </div>
                       </div>
-                      <div className="rounded-full bg-green-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-wide text-green-600 dark:text-green-400">
+                      <div className="rounded-full bg-success/10 px-3 py-1 font-mono text-[10px] uppercase tracking-wide text-success">
                         Resolved
                       </div>
                     </div>
@@ -126,8 +127,8 @@ export default function Hero() {
                       </div>
                       <div className="flex justify-end gap-3">
                         <div className="max-w-xs rounded-lg rounded-tr-none bg-brand-gradient p-3">
-                          <div className="h-2 w-32 rounded bg-white/40" />
-                          <div className="mt-1.5 h-2 w-20 rounded bg-white/40" />
+                          <div className="h-2 w-32 rounded bg-on-brand/40" />
+                          <div className="mt-1.5 h-2 w-20 rounded bg-on-brand/40" />
                         </div>
                         <div className="h-8 w-8 flex-shrink-0 rounded-full bg-brand/15" />
                       </div>

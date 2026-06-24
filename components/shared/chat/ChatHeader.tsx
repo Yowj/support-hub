@@ -22,10 +22,10 @@ export default function ChatHeader({ contactName, ticket, onClose }: ChatHeaderP
       {/* Contact avatar */}
       <div className="relative flex-shrink-0">
         <div className="w-10 h-10 rounded-full bg-brand-gradient flex items-center justify-center shadow-sm">
-          <span className="text-white font-semibold text-sm">{getInitials(contactName)}</span>
+          <span className="text-on-brand font-semibold text-sm">{getInitials(contactName)}</span>
         </div>
         {ticket?.status !== "closed" && (
-          <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-card" />
+          <span className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-card" />
         )}
       </div>
 
