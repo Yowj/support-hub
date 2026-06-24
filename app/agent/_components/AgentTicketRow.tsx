@@ -4,7 +4,8 @@ import React, { useEffect, useRef } from "react";
 import { motion, useAnimationControls } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { PRIORITY_DOT, STATUS_CHIP, avatarColor, getInitials, getRelativeTime } from "@/lib/tickets/format";
+import { PRIORITY_DOT, STATUS_CHIP, getRelativeTime } from "@/lib/tickets/format";
+import Avatar from "boring-avatars";
 import type { Ticket } from "@/types/ticket";
 
 interface AgentTicketRowProps {
@@ -58,21 +59,15 @@ const AgentTicketRow = React.memo(function AgentTicketRow({
       <motion.div className="absolute inset-0 pointer-events-none" animate={flashControls} />
 
       {/* Avatar */}
-      <div
-        className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarColor(
-          ticket.customer_email || ticket.id
-        )} flex items-center justify-center flex-shrink-0 shadow-sm`}
-      >
-        <span className="text-white font-semibold text-xs">
-          {getInitials(ticket.customer_email || "?")}
-        </span>
+      <div className="flex-shrink-0">
+        <Avatar name={ticket.customer_email || ticket.id} size={32} />
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1 mb-0.5">
           {ticket.priority === "urgent" && (
-            <AlertTriangle className="h-3 w-3 text-red-500 flex-shrink-0" />
+            <AlertTriangle className="h-3 w-3 text-danger flex-shrink-0" />
           )}
           <span className="text-xs font-medium truncate text-foreground">
             {ticket.subject}
@@ -96,7 +91,7 @@ const AgentTicketRow = React.memo(function AgentTicketRow({
       {/* Priority dot */}
       <div
         className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
-          PRIORITY_DOT[ticket.priority] || "bg-gray-300"
+          PRIORITY_DOT[ticket.priority] || "bg-muted-foreground/40"
         }`}
         title={`Priority: ${ticket.priority}`}
       />
@@ -134,7 +129,7 @@ const AgentTicketRow = React.memo(function AgentTicketRow({
             variant="outline"
             size="sm"
             disabled={isUpdating}
-            className="h-6 text-[11px] px-2 bg-white dark:bg-gray-800 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+            className="h-6 text-[11px] px-2 bg-success/15 text-success border-success/30 hover:bg-success/25"
           >
             {isUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : "Resolve"}
           </Button>

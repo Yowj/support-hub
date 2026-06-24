@@ -18,8 +18,8 @@ function getPasswordStrength(pw: string): number {
 }
 
 const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"];
-const strengthColor = ["", "bg-red-400", "bg-yellow-400", "bg-blue-400", "bg-green-500"];
-const strengthText = ["", "text-red-500", "text-yellow-500", "text-blue-500", "text-green-500"];
+const strengthColor = ["", "bg-danger", "bg-warning", "bg-info", "bg-success"];
+const strengthText = ["", "text-danger", "text-warning", "text-info", "text-success"];
 
 export default function SignupForm() {
   const [email, setEmail] = useState("");
@@ -75,7 +75,7 @@ export default function SignupForm() {
           <div className={`flex items-start gap-2.5 rounded-lg px-3.5 py-2.5 text-sm border
             ${isError
               ? "bg-destructive/10 border-destructive/20 text-destructive"
-              : "bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400"
+              : "bg-success/10 border-success/20 text-success"
             }`}>
             {isError
               ? <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
@@ -167,7 +167,7 @@ export default function SignupForm() {
               }
             />
             {passwordsMatch && (
-              <p className="text-[11px] text-green-600 dark:text-green-400 flex items-center gap-1 px-0.5">
+              <p className="text-[11px] text-success flex items-center gap-1 px-0.5">
                 <CheckCircle2 className="w-3 h-3" /> Passwords match
               </p>
             )}

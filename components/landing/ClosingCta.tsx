@@ -25,7 +25,7 @@ export default function ClosingCta() {
             <Link href="/login">
               <Button
                 size="lg"
-                className="h-12 gap-2 border-0 bg-brand-gradient px-7 text-base text-white shadow-lg shadow-brand/25 transition hover:opacity-95"
+                className="h-12 gap-2 border-0 bg-brand-gradient px-7 text-base text-on-brand shadow-lg shadow-brand/25 transition hover:opacity-95"
               >
                 Start free trial
                 <ArrowRight className="h-4 w-4" />

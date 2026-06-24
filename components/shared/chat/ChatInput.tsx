@@ -55,9 +55,9 @@ export default function ChatInput({
         aria-label="Send message"
       >
         {isSending ? (
-          <Loader2 className="h-5 w-5 animate-spin text-white" />
+          <Loader2 className="h-5 w-5 animate-spin text-on-brand" />
         ) : (
-          <Send className="h-4 w-4 text-white" />
+          <Send className="h-4 w-4 text-on-brand" />
         )}
       </button>
     </div>

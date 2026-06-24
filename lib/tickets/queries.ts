@@ -100,7 +100,7 @@ export async function fetchAgentTickets(
 export async function assignTicket(
   supabase: SupabaseClient,
   ticketId: string,
-  agent: { id: string; email?: string }
+  agent: { id: string; email: string }
 ): Promise<void> {
   const { error: updateError } = await supabase
     .from("support_tickets")

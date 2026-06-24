@@ -7,9 +7,9 @@ export default function ConditionalNavbar() {
   const pathname = usePathname();
 
   // Hide navbar on shop pages
-  const isShopPage = pathname?.startsWith("/login") || pathname?.startsWith("/signup");
+  const isAuthForm = pathname?.startsWith("/login") || pathname?.startsWith("/signup");
 
-  if (isShopPage) {
+  if (isAuthForm) {
     return null;
   }
 

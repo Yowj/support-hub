@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Instrument_Serif, Fragment_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/context/auth-context";
 import { getUserProfile } from "@/lib/auth";
 import "./globals.css";
@@ -38,20 +37,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en"
-      suppressHydrationWarning
-      className={`${inter.variable} ${instrumentSerif.variable} ${fragmentMono.variable}`}
+      className={`dark ${inter.variable} ${instrumentSerif.variable} ${fragmentMono.variable}`}
     >
       <body className="font-sans antialiased">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <AuthProvider user={user} profile={profile}>
-            <div className="h-screen flex flex-col">
-              <ConditionalNavbar />
-              <main className="flex-1 min-h-0">
-                {children}
-              </main>
-            </div>
-          </AuthProvider>
-        </ThemeProvider>
+        <AuthProvider user={user} profile={profile}>
+          <div className="h-screen flex flex-col">
+            <ConditionalNavbar />
+            <main className="flex-1 min-h-0">
+              {children}
+            </main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

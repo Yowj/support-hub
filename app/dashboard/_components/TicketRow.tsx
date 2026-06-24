@@ -42,9 +42,9 @@ const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick }:
     >
       <motion.div className="absolute inset-0 pointer-events-none" animate={flashControls} />
       <div
-        className={`w-8 h-8 rounded-full bg-gradient-to-br ${STATUS_ICON_BG[ticket.status] || "from-gray-300 to-gray-400"} flex items-center justify-center flex-shrink-0 shadow-sm`}
+        className={`w-8 h-8 rounded-full bg-gradient-to-br ${STATUS_ICON_BG[ticket.status] || "from-muted-foreground/40 to-muted-foreground/60"} flex items-center justify-center flex-shrink-0 shadow-sm`}
       >
-        <Hash className="h-3.5 w-3.5 text-white" />
+        <Hash className="h-3.5 w-3.5 text-on-brand" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="mb-0.5">
@@ -65,7 +65,7 @@ const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick }:
       </div>
       <div
         className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
-          PRIORITY_DOT[ticket.priority] || "bg-gray-300"
+          PRIORITY_DOT[ticket.priority] || "bg-muted-foreground/40"
         }`}
         title={`Priority: ${ticket.priority}`}
       />

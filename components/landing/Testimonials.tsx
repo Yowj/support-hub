@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import Avatar from "boring-avatars";
 import Eyebrow from "./Eyebrow";
 import { testimonials } from "./landing-data";
 import { Reveal } from "./Reveal";
@@ -30,7 +31,7 @@ export default function Testimonials() {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className="h-4 w-4 fill-yellow-400 text-yellow-400"
+                    className="h-4 w-4 fill-warning text-warning"
                   />
                 ))}
               </div>
@@ -38,9 +39,7 @@ export default function Testimonials() {
                 &quot;{testimonial.quote}&quot;
               </p>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand/15 font-mono text-sm font-medium text-brand">
-                  {testimonial.avatar}
-                </div>
+                <Avatar name={testimonial.author} size={40} />
                 <div>
                   <div className="font-medium">{testimonial.author}</div>
                   <div className="text-sm text-muted-foreground">

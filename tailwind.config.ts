@@ -33,6 +33,11 @@ export default {
           to: "hsl(var(--brand-to))",
           cyan: "hsl(var(--brand-cyan))",
         },
+        success: "hsl(var(--success) / <alpha-value>)",
+        warning: "hsl(var(--warning) / <alpha-value>)",
+        danger: "hsl(var(--danger) / <alpha-value>)",
+        info: "hsl(var(--info) / <alpha-value>)",
+        "on-brand": "hsl(var(--on-brand) / <alpha-value>)",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
