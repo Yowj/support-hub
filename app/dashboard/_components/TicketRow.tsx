@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { motion, useAnimationControls } from "framer-motion";
+import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { Hash } from "lucide-react";
 import { PRIORITY_DOT, STATUS_CHIP, STATUS_ICON_BG, getRelativeTime } from "@/lib/tickets/format";
 import type { Ticket } from "@/types/ticket";
@@ -10,11 +10,25 @@ interface TicketRowProps {
   ticket: Ticket;
   isSelected: boolean;
   onClick: () => void;
+  index: number;
 }
 
-const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick }: TicketRowProps) {
+/** Staggered entrance — each row slides in slightly after the one above it.
+ *  Scoped to enter only so exits, reordering, and the update flash stay snappy. */
+const enterVariants = {
+  hidden: { opacity: 0, x: -8 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.25, ease: "easeOut", delay: Math.min(i * 0.04, 0.4) },
+  }),
+};
+
+const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick, index }: TicketRowProps) {
   const flashControls = useAnimationControls();
   const isFirstRender = useRef(true);
+  const shouldReduceMotion = useReducedMotion();
+  const isUrgent = ticket.priority === "urgent";
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -30,11 +44,14 @@ const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick }:
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
+      custom={index}
+      variants={enterVariants}
+      initial="hidden"
+      animate="visible"
       exit={{ opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       style={{ overflow: "hidden" }}
+      whileTap={{ scale: 0.985 }}
       onClick={onClick}
       className={`group relative flex items-start gap-2.5 px-3 py-3 cursor-pointer border-l-2 transition-colors ${
         isSelected ? "bg-accent border-l-primary" : "border-l-transparent hover:bg-accent/50"
@@ -63,10 +80,25 @@ const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick }:
           <span className="text-xs text-muted-foreground">{getRelativeTime(ticket.created_at)}</span>
         </div>
       </div>
-      <div
+      <motion.div
         className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
           PRIORITY_DOT[ticket.priority] || "bg-muted-foreground/40"
         }`}
+        animate={
+          isUrgent && !shouldReduceMotion
+            ? {
+                boxShadow: [
+                  "0 0 0 0 rgba(250,112,112,0.5)",
+                  "0 0 0 5px rgba(250,112,112,0)",
+                ],
+              }
+            : undefined
+        }
+        transition={
+          isUrgent && !shouldReduceMotion
+            ? { duration: 1.6, ease: "easeOut", repeat: Infinity }
+            : undefined
+        }
         title={`Priority: ${ticket.priority}`}
       />
     </motion.div>

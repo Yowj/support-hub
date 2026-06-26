@@ -7,19 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthInput from "@/components/shared/AuthInput";
 import OAuthButtons from "@/components/shared/OAuthButtons";
-
-function getPasswordStrength(pw: string): number {
-  let score = 0;
-  if (pw.length >= 8) score++;
-  if (/[A-Z]/.test(pw)) score++;
-  if (/[0-9]/.test(pw)) score++;
-  if (/[^A-Za-z0-9]/.test(pw)) score++;
-  return score;
-}
-
-const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"];
-const strengthColor = ["", "bg-danger", "bg-warning", "bg-info", "bg-success"];
-const strengthText = ["", "text-danger", "text-warning", "text-info", "text-success"];
+import { getPasswordStrength, getStrengthMeta } from "@/lib/auth/password-strength";
 
 export default function SignupForm() {
   const [email, setEmail] = useState("");
@@ -33,6 +21,7 @@ export default function SignupForm() {
   const router = useRouter();
 
   const strength = password.length > 0 ? getPasswordStrength(password) : 0;
+  const strengthMeta = getStrengthMeta(strength);
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
   const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
@@ -55,7 +44,7 @@ export default function SignupForm() {
       setMessage(error.message);
       setIsLoading(false);
     } else if (data.session) {
-      router.push("/dashboard");
+      router.push("/onboarding");
     } else if (data.user) {
       setIsError(false);
       setMessage("Check your email to confirm your account!");
@@ -131,15 +120,15 @@ export default function SignupForm() {
                     <div
                       key={i}
                       className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                        i <= strength ? strengthColor[strength] : "bg-muted"
+                        i <= strength ? strengthMeta.color : "bg-muted"
                       }`}
                     />
                   ))}
                 </div>
                 <p className="text-[11px] text-muted-foreground">
                   Strength:{" "}
-                  <span className={`font-semibold ${strengthText[strength]}`}>
-                    {strengthLabel[strength]}
+                  <span className={`font-semibold ${strengthMeta.text}`}>
+                    {strengthMeta.label}
                   </span>
                 </p>
               </div>

@@ -14,6 +14,11 @@ export default async function Dashboard() {
     return redirect("/dashboard");
   }
 
+  // Incomplete onboarding — resume it before showing the app.
+  if (!profile.onboarded) {
+    return redirect("/onboarding");
+  }
+
   if (profile.role === "agent" || profile.role === "admin") {
     return redirect("/agent");
   }

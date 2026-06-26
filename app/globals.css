@@ -70,6 +70,11 @@
     animation: breathe 5s ease-in-out infinite;
   }
 
+  /* Onboarding: the identity avatar morphs as the name is typed */
+  .animate-avatar-pop {
+    animation: avatar-pop 0.25s ease-out;
+  }
+
   .animation-delay-200 {
     animation-delay: 0.2s;
     opacity: 0;
@@ -137,7 +142,8 @@
   .animate-fade-in-up,
   .animate-typing-dot,
   .animate-pulse-ring,
-  .animate-breathe {
+  .animate-breathe,
+  .animate-avatar-pop {
     animation: none !important;
   }
   .animation-delay-200,
@@ -186,6 +192,11 @@
 @keyframes breathe {
   0%, 100% { opacity: 0.65; }
   50%       { opacity: 1; }
+}
+
+@keyframes avatar-pop {
+  from { opacity: 0.6; transform: scale(0.94); }
+  to   { opacity: 1;   transform: scale(1); }
 }
 
 /* Smooth scrolling */

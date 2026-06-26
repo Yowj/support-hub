@@ -14,6 +14,11 @@ export default async function AgentPage() {
     return redirect("/agent");
   }
 
+  // Incomplete onboarding — resume it before showing the app.
+  if (!profile.onboarded) {
+    return redirect("/onboarding");
+  }
+
   if (profile.role === "customer") {
     return redirect("/dashboard");
   }

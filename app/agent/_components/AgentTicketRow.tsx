@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { motion, useAnimationControls } from "framer-motion";
+import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { PRIORITY_DOT, STATUS_CHIP, getRelativeTime } from "@/lib/tickets/format";
@@ -31,6 +31,8 @@ const AgentTicketRow = React.memo(function AgentTicketRow({
 }: AgentTicketRowProps) {
   const flashControls = useAnimationControls();
   const isFirstRender = useRef(true);
+  const shouldReduceMotion = useReducedMotion();
+  const isUrgent = ticket.priority === "urgent";
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -51,6 +53,7 @@ const AgentTicketRow = React.memo(function AgentTicketRow({
       exit={{ opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       style={{ overflow: "hidden" }}
+      whileTap={{ scale: 0.985 }}
       onClick={onClick}
       className={`group relative flex items-start gap-2.5 px-3 py-3 cursor-pointer border-l-2 transition-colors ${
         isSelected ? "bg-accent border-l-primary" : "border-l-transparent hover:bg-accent/50"
@@ -88,11 +91,26 @@ const AgentTicketRow = React.memo(function AgentTicketRow({
         </div>
       </div>
 
-      {/* Priority dot */}
-      <div
+      {/* Priority dot — urgent tickets pulse a danger ripple to pull triage focus */}
+      <motion.div
         className={`w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5 ${
           PRIORITY_DOT[ticket.priority] || "bg-muted-foreground/40"
         }`}
+        animate={
+          isUrgent && !shouldReduceMotion
+            ? {
+                boxShadow: [
+                  "0 0 0 0 rgba(250,112,112,0.5)",
+                  "0 0 0 5px rgba(250,112,112,0)",
+                ],
+              }
+            : undefined
+        }
+        transition={
+          isUrgent && !shouldReduceMotion
+            ? { duration: 1.6, ease: "easeOut", repeat: Infinity }
+            : undefined
+        }
         title={`Priority: ${ticket.priority}`}
       />
 

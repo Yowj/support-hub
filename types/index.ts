@@ -5,6 +5,7 @@ export interface UserProfile {
   role: "customer" | "agent" | "admin";
   display_name: string | null;
   avatar_url: string | null;
+  onboarded: boolean;
 }
 
 export interface AuthUser {
