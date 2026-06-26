@@ -22,6 +22,8 @@ export const getUserProfile = cache(async (): Promise<AuthUser> => {
   return { user, profile };
 });
 
+
+//TODO: We need to get rid of this function, we make DB trigger instead
 export async function ensureUserProfile(userId: string, email: string) {
   const supabase = await createClient();
 

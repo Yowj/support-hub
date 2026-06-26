@@ -7,10 +7,10 @@ import {
   fetchAgentTickets,
   assignTicket as assignTicketQuery,
   updateTicketStatus as updateTicketStatusQuery,
-  TICKETS_BROADCAST_CHANNEL,
   type AgentFilter,
   type AgentStats,
-} from "@/lib/tickets/queries";
+} from "@/lib/tickets/agent-queries";
+import { TICKETS_BROADCAST_CHANNEL } from "@/lib/tickets/shared";
 import type { Ticket } from "@/types/ticket";
 
 interface AgentUser {

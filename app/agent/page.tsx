@@ -3,6 +3,7 @@ import AgentDashboard from "@/app/agent/_components/AgentDashboard";
 import { redirect } from "next/navigation";
 
 export default async function AgentPage() {
+  // ! We need to fetch user from server for security purposes, since the client can be manipulated by the user.
   const { user, profile } = await getUserProfile();
 
   if (!user) {

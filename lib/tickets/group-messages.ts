@@ -6,7 +6,7 @@ export interface MessageGroup {
   messages: Message[];
 }
 
-/** Group consecutive messages under their formatted calendar date for separators. */
+// used in MessageList.tsx to group messages by date for display
 export function groupMessagesByDate(messages: Message[]): MessageGroup[] {
   const groups: MessageGroup[] = [];
   messages.forEach((msg) => {

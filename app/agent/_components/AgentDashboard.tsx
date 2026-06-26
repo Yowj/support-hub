@@ -6,7 +6,7 @@ import ChatInterface from "@/components/shared/ChatInterface";
 import AgentTicketRow from "@/app/agent/_components/AgentTicketRow";
 import { useAgentTickets } from "@/app/agent/_hooks/use-agent-tickets";
 import { AnimatePresence } from "framer-motion";
-import type { AgentFilter } from "@/lib/tickets/queries";
+import type { AgentFilter } from "@/lib/tickets/agent-queries";
 import FilterTabs, { type FilterTab } from "@/components/shared/FilterTabs";
 import TicketSearchInput from "@/components/shared/TicketSearchInput";
 import { TicketListSkeleton, TicketListEmpty } from "@/components/shared/TicketListStates";
