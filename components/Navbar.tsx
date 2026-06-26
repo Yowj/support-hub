@@ -24,27 +24,6 @@ const letter: Variants = {
   show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.42, ease: EASE } },
 };
 
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function getAvatarGradient(role: string): string {
-  // Decorative role-identity gradients — avatar coloring, not semantic signal.
-  switch (role) {
-    case "agent":
-      return "from-purple-500 to-indigo-500";
-    case "admin":
-      return "from-rose-500 to-pink-500";
-    default:
-      return "from-blue-400 to-cyan-500";
-  }
-}
-
 export default function Navbar() {
   const { user, profile } = useAuth();
   const router = useRouter();
@@ -126,10 +105,7 @@ export default function Navbar() {
               transition={{ duration: reduce ? 0 : 0.5, ease: EASE, delay: reduce ? 0 : NAV_DELAY + 0.55 }}
             >
               <div className="flex items-center gap-2.5 pr-1">
-                <div
-                  className={`w-9 h-9 rounded-full bg-gradient-to-br ${getAvatarGradient(role)} flex items-center justify-center shadow-sm flex-shrink-0`}
-                >
-                  <span className="text-on-brand font-semibold text-sm">{getInitials(displayName)}</span>
+                <div className="flex-shrink-0">
                 </div>
                 <div className="hidden md:block leading-tight">
                   <div className="text-sm font-semibold text-foreground truncate max-w-[140px]">

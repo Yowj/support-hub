@@ -4,7 +4,8 @@ import React, { useEffect, useRef } from "react";
 import { motion, useAnimationControls } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { PRIORITY_DOT, STATUS_CHIP, avatarColor, getInitials, getRelativeTime } from "@/lib/tickets/format";
+import { PRIORITY_DOT, STATUS_CHIP, getRelativeTime } from "@/lib/tickets/format";
+import Avatar from "boring-avatars";
 import type { Ticket } from "@/types/ticket";
 
 interface AgentTicketRowProps {
@@ -58,14 +59,8 @@ const AgentTicketRow = React.memo(function AgentTicketRow({
       <motion.div className="absolute inset-0 pointer-events-none" animate={flashControls} />
 
       {/* Avatar */}
-      <div
-        className={`w-8 h-8 rounded-full bg-gradient-to-br ${avatarColor(
-          ticket.customer_email || ticket.id
-        )} flex items-center justify-center flex-shrink-0 shadow-sm`}
-      >
-        <span className="text-on-brand font-semibold text-xs">
-          {getInitials(ticket.customer_email || "?")}
-        </span>
+      <div className="flex-shrink-0">
+        <Avatar name={ticket.customer_email || ticket.id} size={32} />
       </div>
 
       {/* Content */}

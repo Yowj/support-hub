@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { createTicket } from "@/lib/tickets/queries";
+import { createTicket } from "@/lib/tickets/customer-queries";
 import type { TicketPriority } from "@/types/ticket";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

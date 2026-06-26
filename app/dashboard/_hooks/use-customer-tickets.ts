@@ -7,7 +7,7 @@ import {
   fetchCustomerTickets,
   type CustomerFilter,
   type CustomerStats,
-} from "@/lib/tickets/queries";
+} from "@/lib/tickets/customer-queries";
 import type { Ticket } from "@/types/ticket";
 
 /**

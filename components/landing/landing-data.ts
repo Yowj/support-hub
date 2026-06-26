@@ -88,7 +88,6 @@ export interface Testimonial {
   quote: string;
   author: string;
   role: string;
-  avatar: string;
 }
 
 export const testimonials: Testimonial[] = [
@@ -97,42 +96,36 @@ export const testimonials: Testimonial[] = [
       "SupportHub transformed how we handle inquiries. Our response time dropped from hours to minutes.",
     author: "Sarah Chen",
     role: "Head of Support, TechFlow",
-    avatar: "SC",
   },
   {
     quote:
       "The AI features are incredible. They handle 60% of our tickets automatically, so the team focuses on the hard ones.",
     author: "Marcus Johnson",
     role: "CTO, StartupXYZ",
-    avatar: "MJ",
   },
   {
     quote:
       "Finally, a support tool that's actually easy to use. Our team was up and running in less than a day.",
     author: "Emily Rodriguez",
     role: "Operations Manager, CloudScale",
-    avatar: "ER",
   },
   {
     quote:
       "The analytics gave us insights we never had before. We can finally measure and improve our support.",
     author: "David Kim",
     role: "VP Customer Success, DataDrive",
-    avatar: "DK",
   },
   {
     quote:
       "Customer satisfaction went up 40% after switching. The difference is night and day.",
     author: "Lisa Thompson",
     role: "Support Lead, FinanceApp",
-    avatar: "LT",
   },
   {
     quote:
       "The best investment we made this year. ROI was evident within the first month.",
     author: "Alex Patel",
     role: "CEO, GrowthCo",
-    avatar: "AP",
   },
 ];
 

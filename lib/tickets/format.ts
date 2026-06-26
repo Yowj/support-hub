@@ -26,35 +26,6 @@ export const STATUS_ICON_BG: Record<TicketStatus, string> = {
   closed: "from-muted-foreground/40 to-muted-foreground/60",
 };
 
-/** Decorative per-user avatar gradients — identity coloring, not signal. */
-const AVATAR_COLORS = [
-  "from-indigo-400 to-purple-500",
-  "from-blue-400 to-cyan-500",
-  "from-rose-400 to-pink-500",
-  "from-emerald-400 to-teal-500",
-  "from-amber-400 to-orange-500",
-];
-
-/** Deterministically pick an avatar gradient from a seed string. */
-export function avatarColor(seed: string): string {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-
-/** Up-to-two-letter uppercase initials from a name/email. */
-export function getInitials(name: string): string {
-  return (
-    name
-      .split(" ")
-      .filter(Boolean)
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || "?"
-  );
-}
-
 /** Human-friendly "x minutes ago" style relative time. */
 export function getRelativeTime(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();

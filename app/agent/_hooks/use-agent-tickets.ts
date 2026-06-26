@@ -7,10 +7,10 @@ import {
   fetchAgentTickets,
   assignTicket as assignTicketQuery,
   updateTicketStatus as updateTicketStatusQuery,
-  TICKETS_BROADCAST_CHANNEL,
   type AgentFilter,
   type AgentStats,
-} from "@/lib/tickets/queries";
+} from "@/lib/tickets/agent-queries";
+import { TICKETS_BROADCAST_CHANNEL } from "@/lib/tickets/shared";
 import type { Ticket } from "@/types/ticket";
 
 interface AgentUser {
@@ -18,10 +18,6 @@ interface AgentUser {
   email?: string;
 }
 
-/**
- * Owns the agent queue's data: ticket list, tab stats, realtime updates, and
- * the assign/status mutations. Keeps the dashboard component presentational.
- */
 export function useAgentTickets(user: AgentUser, filter: AgentFilter) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<AgentStats>({ all: 0, unassigned: 0, mine: 0, assigned: 0 });
@@ -35,60 +31,66 @@ export function useAgentTickets(user: AgentUser, filter: AgentFilter) {
     if (next) setStats(next);
   }, [user.id, supabase]);
 
-  const refreshTickets = useCallback(
-    async (background = false) => {
-      if (!background) setIsLoading(true);
-      try {
-        setTickets(await fetchAgentTickets(supabase, filter, user.id));
-      } catch {
-        // error already logged in the query layer
-      } finally {
-        if (!background) setIsLoading(false);
-      }
-    },
-    [filter, user.id, supabase]
-  );
+  // Initial / filter-change load: shows the loading state.
+  const loadTickets = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      setTickets(await fetchAgentTickets(supabase, filter, user.id));
+    } catch {
+      // error already logged in the query layer
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filter, user.id, supabase]);
+
+  // Silent refresh used by realtime/after-action updates: no loading flicker.
+  const syncTickets = useCallback(async () => {
+    try {
+      setTickets(await fetchAgentTickets(supabase, filter, user.id));
+    } catch {
+      // error already logged in the query layer
+    }
+  }, [filter, user.id, supabase]);
 
   useEffect(() => {
-    refreshTickets();
+    loadTickets();
     refreshStats();
 
-    const channel = supabase
+    // Both listeners do the same thing: re-fetch the queue and tab counts.
+    const refreshQueue = () => {
+      syncTickets();
+      refreshStats();
+    };
+
+    // Listener 1: native DB events — reliable for UPDATE/DELETE on tickets.
+    const dbChangesListener = supabase
       .channel("agent-tickets")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "support_tickets" },
-        () => {
-          refreshTickets(true);
-          refreshStats();
-        }
+        refreshQueue
       )
       .subscribe();
 
-    // Secondary listener for new tickets created by customers.
-    // postgres_changes (above) handles UPDATE/DELETE reliably, but INSERT events
-    // from other users are blocked by Supabase Realtime's RLS evaluation on
-    // complex cross-table policies. The customer broadcasts on this channel after
-    // creating a ticket, and we pick it up here to trigger a fresh fetch.
-    const broadcastChannel = supabase
+    // Listener 2: manual broadcast — catches new tickets that RLS hides from
+    // the DB INSERT event (customer fires "ticket-created" after creating one).
+    // ! Note: this is a temporary workaround, u need RLS-based na broadcast
+    const newTicketListener = supabase
       .channel(TICKETS_BROADCAST_CHANNEL)
-      .on("broadcast", { event: "ticket-created" }, () => {
-        refreshTickets(true);
-        refreshStats();
-      })
+      .on("broadcast", { event: "ticket-created" }, refreshQueue)
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
-      supabase.removeChannel(broadcastChannel);
+      supabase.removeChannel(dbChangesListener);
+      supabase.removeChannel(newTicketListener);
     };
-  }, [filter, refreshTickets, refreshStats, supabase]);
+  }, [filter, loadTickets, syncTickets, refreshStats, supabase]);
 
   const assignTicket = async (ticketId: string) => {
     setAssigningTicketId(ticketId);
     try {
       await assignTicketQuery(supabase, ticketId, user);
-      await Promise.all([refreshTickets(true), refreshStats()]);
+      await Promise.all([syncTickets(), refreshStats()]);
     } catch (error) {
       console.error("Error assigning ticket:", error);
     } finally {
@@ -100,7 +102,7 @@ export function useAgentTickets(user: AgentUser, filter: AgentFilter) {
     setUpdatingTicketId(ticketId);
     try {
       await updateTicketStatusQuery(supabase, ticketId, status, user.id);
-      await Promise.all([refreshTickets(true), refreshStats()]);
+      await Promise.all([syncTickets(), refreshStats()]);
     } catch (error) {
       console.error("Error updating ticket status:", error);
     } finally {

@@ -1,5 +1,6 @@
 import type { Message } from "@/types/ticket";
-import { getInitials, formatTime } from "@/lib/tickets/format";
+import Avatar from "boring-avatars";
+import { formatTime } from "@/lib/tickets/format";
 
 interface MessageBubbleProps {
   message: Message;
@@ -21,8 +22,8 @@ export default function MessageBubble({ message, isMine, contactName }: MessageB
   return (
     <div className={`flex items-end gap-2 mb-1 ${isMine ? "justify-end" : "justify-start"}`}>
       {!isMine && (
-        <div className="w-7 h-7 rounded-full bg-brand-gradient flex items-center justify-center flex-shrink-0 shadow-sm mb-5">
-          <span className="text-on-brand font-semibold text-xs">{getInitials(contactName)}</span>
+        <div className="flex-shrink-0 mb-5">
+          <Avatar name={contactName} size={28} />
         </div>
       )}
 

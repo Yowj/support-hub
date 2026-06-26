@@ -8,7 +8,7 @@ import NewTicketForm from "./NewTicketForm";
 import ChatInterface from "@/components/shared/ChatInterface";
 import TicketRow from "@/app/dashboard/_components/TicketRow";
 import { useCustomerTickets } from "@/app/dashboard/_hooks/use-customer-tickets";
-import type { CustomerFilter } from "@/lib/tickets/queries";
+import type { CustomerFilter } from "@/lib/tickets/customer-queries";
 import FilterTabs, { type FilterTab } from "@/components/shared/FilterTabs";
 import TicketSearchInput from "@/components/shared/TicketSearchInput";
 import { TicketListSkeleton, TicketListEmpty } from "@/components/shared/TicketListStates";

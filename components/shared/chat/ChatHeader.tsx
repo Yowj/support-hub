@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
+import Avatar from "boring-avatars";
 import type { Ticket } from "@/types/ticket";
-import { getInitials, getStatusStyle, getPriorityStyle } from "@/lib/tickets/format";
+import { getStatusStyle, getPriorityStyle } from "@/lib/tickets/format";
 
 interface ChatHeaderProps {
   contactName: string;
@@ -21,9 +22,7 @@ export default function ChatHeader({ contactName, ticket, onClose }: ChatHeaderP
 
       {/* Contact avatar */}
       <div className="relative flex-shrink-0">
-        <div className="w-10 h-10 rounded-full bg-brand-gradient flex items-center justify-center shadow-sm">
-          <span className="text-on-brand font-semibold text-sm">{getInitials(contactName)}</span>
-        </div>
+        <Avatar name={contactName} size={40} />
         {ticket?.status !== "closed" && (
           <span className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-card" />
         )}
