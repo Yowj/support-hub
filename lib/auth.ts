@@ -1,6 +1,16 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type { AuthUser } from "@/types";
+import type { AuthUser, UserProfile } from "@/types";
+
+/**
+ * Single source of truth for where a logged-in user belongs:
+ * unfinished onboarding first, then their role's dashboard.
+ */
+export function resolveLandingRoute(profile: UserProfile | null): string {
+  if (!profile?.onboarded) return "/onboarding";
+  if (profile.role === "agent" || profile.role === "admin") return "/agent";
+  return "/dashboard";
+}
 
 export const getUserProfile = cache(async (): Promise<AuthUser> => {
   const supabase = await createClient();

@@ -1,4 +1,4 @@
-import { getUserProfile, ensureUserProfile } from "@/lib/auth";
+import { getUserProfile, ensureUserProfile, resolveLandingRoute } from "@/lib/auth";
 import CustomerDashboard from "@/app/dashboard/_components/CustomerDashboard";
 import { redirect } from "next/navigation";
 
@@ -14,13 +14,10 @@ export default async function Dashboard() {
     return redirect("/dashboard");
   }
 
-  // Incomplete onboarding — resume it before showing the app.
-  if (!profile.onboarded) {
-    return redirect("/onboarding");
-  }
-
-  if (profile.role === "agent" || profile.role === "admin") {
-    return redirect("/agent");
+  // Onboarding-incomplete or wrong-role users get routed away.
+  const target = resolveLandingRoute(profile);
+  if (target !== "/dashboard") {
+    return redirect(target);
   }
 
   return <CustomerDashboard user={user} />;

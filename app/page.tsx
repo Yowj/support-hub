@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getUserProfile } from "@/lib/auth";
+import { getUserProfile, resolveLandingRoute } from "@/lib/auth";
 import Hero from "@/components/landing/Hero";
 import TrustStrip from "@/components/landing/TrustStrip";
 import FeatureHighlight from "@/components/landing/FeatureHighlight";
@@ -15,9 +15,7 @@ export default async function LandingPage() {
 
   // Logged-in users skip the marketing page and go where they belong.
   if (user) {
-    if (!profile?.onboarded) redirect("/onboarding");
-    if (profile.role === "agent" || profile.role === "admin") redirect("/agent");
-    redirect("/dashboard");
+    redirect(resolveLandingRoute(profile));
   }
 
   return (

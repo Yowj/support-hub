@@ -1,4 +1,4 @@
-import { getUserProfile } from "@/lib/auth";
+import { getUserProfile, resolveLandingRoute } from "@/lib/auth";
 import OnboardingForm from "@/components/auth/OnboardingForm";
 import { redirect } from "next/navigation";
 
@@ -9,9 +9,9 @@ export default async function Onboarding() {
     return redirect("/login");
   }
 
-  // Already onboarded — don't let them redo it.
+  // Already onboarded — send them to their dashboard, don't let them redo it.
   if (profile?.onboarded) {
-    return redirect("/dashboard");
+    return redirect(resolveLandingRoute(profile));
   }
 
   // The default display_name is the email handle; treat that as "not yet set".

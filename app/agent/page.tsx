@@ -1,4 +1,4 @@
-import { getUserProfile, ensureUserProfile } from "@/lib/auth";
+import { getUserProfile, ensureUserProfile, resolveLandingRoute } from "@/lib/auth";
 import AgentDashboard from "@/app/agent/_components/AgentDashboard";
 import { redirect } from "next/navigation";
 
@@ -14,13 +14,10 @@ export default async function AgentPage() {
     return redirect("/agent");
   }
 
-  // Incomplete onboarding — resume it before showing the app.
-  if (!profile.onboarded) {
-    return redirect("/onboarding");
-  }
-
-  if (profile.role === "customer") {
-    return redirect("/dashboard");
+  // Onboarding-incomplete or wrong-role users get routed away.
+  const target = resolveLandingRoute(profile);
+  if (target !== "/agent") {
+    return redirect(target);
   }
 
   return <AgentDashboard user={{ id: user.id, email: user.email }} />;
