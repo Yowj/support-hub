@@ -28,7 +28,7 @@ export interface CustomerStats {
   resolved: number;
 }
 
-/** Aggregate open-ticket counts for the agent queue tabs. */
+// function for getting agent stats and tickets
 export async function fetchAgentStats(
   supabase: SupabaseClient,
   userId: string
@@ -46,7 +46,7 @@ export async function fetchAgentStats(
   };
 }
 
-/** Fetch the (non-closed) ticket queue for an agent, scoped by filter. */
+/// Fetch the agent queue tickets, scoped by filter.
 export async function fetchAgentTickets(
   supabase: SupabaseClient,
   filter: AgentFilter,
@@ -100,7 +100,7 @@ export async function fetchAgentTickets(
 export async function assignTicket(
   supabase: SupabaseClient,
   ticketId: string,
-  agent: { id: string; email: string }
+  agent: { id: string; email?: string }
 ): Promise<void> {
   const { error: updateError } = await supabase
     .from("support_tickets")
@@ -108,12 +108,13 @@ export async function assignTicket(
     .eq("id", ticketId);
   if (updateError) throw updateError;
 
+  const agentLabel = agent.email || "A support agent";
   await supabase.from("chat_messages").insert([
     {
       ticket_id: ticketId,
       sender_id: agent.id,
       sender_type: "system",
-      message: `Agent ${agent.email} has been assigned to this ticket.`,
+      message: `${agentLabel} has been assigned to this ticket.`,
     },
   ]);
 }

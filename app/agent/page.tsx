@@ -17,5 +17,5 @@ export default async function AgentPage() {
     return redirect("/dashboard");
   }
 
-  return <AgentDashboard user={user} />;
+  return <AgentDashboard user={{ id: user.id, email: user.email }} />;
 }

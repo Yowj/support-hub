@@ -1,7 +1,8 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { AuthUser } from "@/types";
 
-export async function getUserProfile(): Promise<AuthUser> {
+export const getUserProfile = cache(async (): Promise<AuthUser> => {
   const supabase = await createClient();
 
   const {
@@ -19,7 +20,7 @@ export async function getUserProfile(): Promise<AuthUser> {
     .single();
 
   return { user, profile };
-}
+});
 
 export async function ensureUserProfile(userId: string, email: string) {
   const supabase = await createClient();

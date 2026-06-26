@@ -11,7 +11,10 @@
       "Bash(grep -E \"types\\\\.\\(ts|tsx\\)$\")",
       "Skill(run)",
       "Skill(run:*)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npx skills *)",
+      "Bash(find \"$HOME/.agents/skills/nextjs-app-router-patterns\" \"$HOME/.claude/skills/nextjs-app-router-patterns\" -type f 2>/dev/null)",
+      "Read(//c/Users/eugen/.agents/skills/nextjs-app-router-patterns/**)"
     ],
     "deny": [],
     "ask": []
