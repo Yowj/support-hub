@@ -10,21 +10,20 @@ interface TicketRowProps {
   ticket: Ticket;
   isSelected: boolean;
   onClick: () => void;
-  index: number;
 }
 
-/** Staggered entrance — each row slides in slightly after the one above it.
- *  Scoped to enter only so exits, reordering, and the update flash stay snappy. */
+/** Entrance — each row slides in. Scoped to enter only so exits,
+ *  reordering, and the update flash stay snappy. */
 const enterVariants = {
   hidden: { opacity: 0, x: -8 },
-  visible: (i: number) => ({
+  visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.25, ease: "easeOut", delay: Math.min(i * 0.04, 0.4) },
-  }),
-};
+    transition: { duration: 0.25, ease: "easeOut" },
+  },
+} as const;
 
-const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick, index }: TicketRowProps) {
+const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick }: TicketRowProps) {
   const flashControls = useAnimationControls();
   const isFirstRender = useRef(true);
   const shouldReduceMotion = useReducedMotion();
@@ -44,7 +43,6 @@ const TicketRow = React.memo(function TicketRow({ ticket, isSelected, onClick, i
   return (
     <motion.div
       layout
-      custom={index}
       variants={enterVariants}
       initial="hidden"
       animate="visible"
