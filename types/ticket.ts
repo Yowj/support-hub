@@ -11,6 +11,7 @@ export interface Ticket {
   customer_id: string;
   agent_id: string | null;
   customer_email?: string;
+  customer_avatar_url?: string | null;
 }
 
 export interface Message {

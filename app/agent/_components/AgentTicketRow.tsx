@@ -5,7 +5,7 @@ import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { PRIORITY_DOT, STATUS_CHIP, getRelativeTime } from "@/lib/tickets/format";
-import Avatar from "boring-avatars";
+import UserAvatar from "@/components/shared/UserAvatar";
 import type { Ticket } from "@/types/ticket";
 
 interface AgentTicketRowProps {
@@ -63,7 +63,11 @@ const AgentTicketRow = React.memo(function AgentTicketRow({
 
       {/* Avatar */}
       <div className="flex-shrink-0">
-        <Avatar name={ticket.customer_email || ticket.id} size={32} />
+        <UserAvatar
+          name={ticket.customer_email || ticket.id}
+          src={ticket.customer_avatar_url}
+          size={32}
+        />
       </div>
 
       {/* Content */}

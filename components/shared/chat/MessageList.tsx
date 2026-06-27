@@ -3,19 +3,26 @@ import { MessageCircle } from "lucide-react";
 import type { Message } from "@/types/ticket";
 import { groupMessagesByDate } from "@/lib/tickets/group-messages";
 import MessageBubble from "./MessageBubble";
+import TypingIndicator from "./TypingIndicator";
 
 interface MessageListProps {
   messages: Message[];
   userId: string;
   contactName: string;
+  isOtherTyping?: boolean;
 }
 
-export default function MessageList({ messages, userId, contactName }: MessageListProps) {
+export default function MessageList({
+  messages,
+  userId,
+  contactName,
+  isOtherTyping = false,
+}: MessageListProps) {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isOtherTyping]);
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
@@ -53,6 +60,7 @@ export default function MessageList({ messages, userId, contactName }: MessageLi
           </div>
         ))
       )}
+      {isOtherTyping && <TypingIndicator contactName={contactName} />}
       <div ref={endRef} />
     </div>
   );

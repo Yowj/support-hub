@@ -2,9 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { Message, Ticket } from "@/types/ticket";
 
 type UserRole = "customer" | "agent";
+
+// How long to keep showing the indicator after the last received "typing" event.
+const TYPING_CLEAR_MS = 3000;
+// Don't broadcast more than one "typing" event within this window.
+const TYPING_THROTTLE_MS = 1500;
 
 /**
  * Owns a single ticket conversation: loads the ticket + messages, subscribes to
@@ -18,7 +24,11 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const lastTypingSentRef = useRef(0);
+  const typingClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -49,8 +59,10 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
 
     fetchTicketAndMessages();
 
-    const channel = supabase
-      .channel(`ticket-${ticketId}`)
+    // Messages channel: postgres_changes. This requires Realtime replication to
+    // be enabled on `chat_messages` in the Supabase dashboard.
+    const messagesChannel = supabase
+      .channel(`ticket-${ticketId}-messages`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "chat_messages", filter: `ticket_id=eq.${ticketId}` },
@@ -63,10 +75,60 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
       )
       .subscribe();
 
+    // Typing channel: broadcast only. Kept SEPARATE from postgres_changes so it
+    // still subscribes (and typing works) even when table replication is off —
+    // broadcast needs no DB setup at all.
+    const typingChannel = supabase
+      .channel(`ticket-${ticketId}-typing`, { config: { broadcast: { self: false } } })
+      .on("broadcast", { event: "typing" }, (payload) => {
+        // Ignore our own events (self:false already filters, but guard anyway).
+        if (payload.payload?.senderId === userId) return;
+        setIsOtherTyping(true);
+        if (typingClearTimerRef.current) clearTimeout(typingClearTimerRef.current);
+        typingClearTimerRef.current = setTimeout(() => setIsOtherTyping(false), TYPING_CLEAR_MS);
+      })
+      .on("broadcast", { event: "stop_typing" }, (payload) => {
+        if (payload.payload?.senderId === userId) return;
+        if (typingClearTimerRef.current) clearTimeout(typingClearTimerRef.current);
+        setIsOtherTyping(false);
+      })
+      .subscribe((status) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("Typing channel failed to subscribe:", status);
+        }
+      });
+
+    channelRef.current = typingChannel;
+
     return () => {
-      supabase.removeChannel(channel);
+      if (typingClearTimerRef.current) clearTimeout(typingClearTimerRef.current);
+      channelRef.current = null;
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(typingChannel);
     };
-  }, [ticketId, supabase]);
+  }, [ticketId, userId, supabase]);
+
+  /** Broadcasts that the local user is typing, throttled to avoid spamming the channel. */
+  const notifyTyping = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < TYPING_THROTTLE_MS) return;
+    lastTypingSentRef.current = now;
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { senderId: userId, senderType: userRole },
+    });
+  }, [userId, userRole]);
+
+  /** Tells the other party we've stopped typing (e.g. after sending a message). */
+  const notifyStopTyping = useCallback(() => {
+    lastTypingSentRef.current = 0;
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "stop_typing",
+      payload: { senderId: userId, senderType: userRole },
+    });
+  }, [userId, userRole]);
 
   const resizeTextarea = useCallback(() => {
     const el = textareaRef.current;
@@ -78,6 +140,7 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewMessage(e.target.value);
     resizeTextarea();
+    if (e.target.value.trim()) notifyTyping();
   };
 
   const sendMessage = async () => {
@@ -95,6 +158,7 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
       if (sendError) throw sendError;
       setNewMessage("");
       if (textareaRef.current) textareaRef.current.style.height = "auto";
+      notifyStopTyping();
       setError(null);
     } catch (err: unknown) {
       console.error("Error sending message:", err);
@@ -110,6 +174,7 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
     newMessage,
     isLoading,
     isSending,
+    isOtherTyping,
     error,
     textareaRef,
     setError,

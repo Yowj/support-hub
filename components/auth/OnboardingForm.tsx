@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/client";
 import { useMemo, useState } from "react";
 import { Loader2, AlertCircle, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Avatar from "boring-avatars";
 import AuthInput from "@/components/shared/AuthInput";
+import AvatarPicker from "@/components/auth/AvatarPicker";
+import UserAvatar from "@/components/shared/UserAvatar";
 
 const MIN_LENGTH = 2;
 const MAX_LENGTH = 32;
@@ -26,6 +27,7 @@ function toHandle(name: string): string {
 
 export default function OnboardingForm({ userId, initialName = "" }: OnboardingFormProps) {
   const [name, setName] = useState(initialName);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -53,14 +55,22 @@ export default function OnboardingForm({ userId, initialName = "" }: OnboardingF
     // hasn't been provisioned yet (e.g. straight from sign-up).
     const { data, error: updateError } = await supabase
       .from("user_profiles")
-      .update({ display_name: trimmed, onboarded: true })
+      .update({ display_name: trimmed, avatar_url: avatarUrl, onboarded: true })
       .eq("id", userId)
       .select("id");
 
     if (!updateError && (!data || data.length === 0)) {
       const { error: insertError } = await supabase
         .from("user_profiles")
-        .insert([{ id: userId, role: "customer", display_name: trimmed, onboarded: true }]);
+        .insert([
+          {
+            id: userId,
+            role: "customer",
+            display_name: trimmed,
+            avatar_url: avatarUrl,
+            onboarded: true,
+          },
+        ]);
       if (insertError) {
         setError(insertError.message);
         setIsLoading(false);
@@ -87,10 +97,10 @@ export default function OnboardingForm({ userId, initialName = "" }: OnboardingF
         <div className="relative mb-5">
           <span className="absolute -inset-3 rounded-full bg-brand-gradient opacity-20 blur-xl animate-breathe" />
           <div
-            key={previewName}
-            className="relative animate-avatar-pop rounded-full ring-1 ring-border/80 shadow-lg"
+            key={avatarUrl ?? previewName}
+            className="relative animate-avatar-pop overflow-hidden rounded-full ring-1 ring-border/80 shadow-lg"
           >
-            <Avatar name={previewName} size={76} />
+            <UserAvatar name={previewName} src={avatarUrl} size={76} />
           </div>
         </div>
 
@@ -127,6 +137,13 @@ export default function OnboardingForm({ userId, initialName = "" }: OnboardingF
             <span>{error}</span>
           </div>
         )}
+
+        <div className="space-y-2">
+          <span className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            Pick your avatar
+          </span>
+          <AvatarPicker value={avatarUrl} onChange={setAvatarUrl} seedHint={trimmed} />
+        </div>
 
         <div className="space-y-1.5">
           <AuthInput

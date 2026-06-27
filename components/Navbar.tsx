@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, User, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
+import UserAvatar from "@/components/shared/UserAvatar";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const WORDMARK = "SupportHub";
@@ -106,6 +107,12 @@ export default function Navbar() {
             >
               <div className="flex items-center gap-2.5 pr-1">
                 <div className="flex-shrink-0">
+                  <UserAvatar
+                    name={displayName}
+                    src={profile?.avatar_url}
+                    size={32}
+                    className="ring-1 ring-border/80"
+                  />
                 </div>
                 <div className="hidden md:block leading-tight">
                   <div className="text-sm font-semibold text-foreground truncate max-w-[140px]">

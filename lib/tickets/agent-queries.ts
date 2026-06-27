@@ -75,6 +75,7 @@ export async function fetchAgentTickets(
     customer_id: ticket.customer_id,
     agent_id: ticket.agent_id,
     customer_email: ticket.customer?.display_name || "Unknown Customer",
+    customer_avatar_url: ticket.customer?.avatar_url ?? null,
   }));
 }
 

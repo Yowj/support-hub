@@ -33,6 +33,7 @@ export default function ChatInterface({
     newMessage,
     isLoading,
     isSending,
+    isOtherTyping,
     error,
     textareaRef,
     setError,
@@ -81,7 +82,12 @@ export default function ChatInterface({
     >
       <ChatHeader contactName={contactName} ticket={ticket} onClose={onClose} />
 
-      <MessageList messages={messages} userId={userId} contactName={contactName} />
+      <MessageList
+        messages={messages}
+        userId={userId}
+        contactName={contactName}
+        isOtherTyping={isOtherTyping}
+      />
 
       {/* Error banner (non-fatal send/load errors) */}
       {error && (
