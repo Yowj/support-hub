@@ -43,6 +43,8 @@ export default function CustomerDashboard({ user }: CustomerDashboardProps) {
     (t) => !search || t.subject.toLowerCase().includes(search.toLowerCase())
   );
 
+  const hasSelection = viewMode === "new-ticket" || !!selectedTicketId;
+
   const TABS: FilterTab<CustomerFilter>[] = [
     { key: "all", label: "All", count: stats.all },
     { key: "open", label: "Open", count: stats.open },
@@ -53,7 +55,11 @@ export default function CustomerDashboard({ user }: CustomerDashboardProps) {
   return (
     <div className="flex h-full">
       {/* Left Sidebar */}
-      <DashboardSidebar className="w-[300px] flex-shrink-0 flex flex-col border-r border-border bg-card">
+      <DashboardSidebar
+        className={`w-full md:w-[300px] flex-shrink-0 flex-col border-r border-border bg-card ${
+          hasSelection ? "hidden md:flex" : "flex"
+        }`}
+      >
 
         {/* Sidebar Header */}
         <div className="px-4 pt-4 pb-3 border-b border-border">
@@ -103,7 +109,11 @@ export default function CustomerDashboard({ user }: CustomerDashboardProps) {
       </DashboardSidebar>
 
       {/* Right Panel */}
-      <DashboardPanel className="flex-1 overflow-hidden flex flex-col bg-background">
+      <DashboardPanel
+        className={`flex-1 overflow-hidden flex-col bg-background ${
+          hasSelection ? "flex" : "hidden md:flex"
+        }`}
+      >
         {viewMode === "new-ticket" ? (
           <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-2xl mx-auto">

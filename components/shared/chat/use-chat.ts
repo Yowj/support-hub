@@ -17,9 +17,17 @@ const TYPING_THROTTLE_MS = 1500;
  * realtime inserts, and exposes send + textarea auto-resize. Keeps ChatInterface
  * purely presentational.
  */
+// Shown until the other party's profile resolves, or when there's no one on the
+// other side yet (e.g. an unassigned ticket has no agent).
+const FALLBACK_CONTACT_NAME: Record<UserRole, string> = {
+  customer: "Support Agent",
+  agent: "Customer",
+};
+
 export function useChat(ticketId: string, userId: string, userRole: UserRole) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [ticket, setTicket] = useState<Ticket | null>(null);
+  const [contactName, setContactName] = useState(FALLBACK_CONTACT_NAME[userRole]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
@@ -32,6 +40,24 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
   const supabase = createClient();
 
   useEffect(() => {
+    // The contact is whoever is on the other side of the ticket: the agent for a
+    // customer, the customer for an agent. Resolve their display name, falling
+    // back when there's no one assigned yet (e.g. an unassigned ticket).
+    const resolveContactName = async (ticketData: Ticket | null) => {
+      const contactId =
+        userRole === "customer" ? ticketData?.agent_id : ticketData?.customer_id;
+      if (!contactId) {
+        setContactName(FALLBACK_CONTACT_NAME[userRole]);
+        return;
+      }
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("display_name")
+        .eq("id", contactId)
+        .single();
+      setContactName(profile?.display_name || FALLBACK_CONTACT_NAME[userRole]);
+    };
+
     const fetchTicketAndMessages = async () => {
       try {
         const [ticketResponse, messagesResponse] = await Promise.all([
@@ -49,6 +75,8 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
         setTicket(ticketResponse.data);
         setMessages(messagesResponse.data || []);
         setError(null);
+
+        await resolveContactName(ticketResponse.data);
       } catch (err: unknown) {
         console.error("Error fetching ticket data:", err);
         setError("Failed to load chat. Please try refreshing the page.");
@@ -71,6 +99,22 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
           setMessages((prev) =>
             prev.some((m) => m.id === incoming.id) ? prev : [...prev, incoming]
           );
+        }
+      )
+      .subscribe();
+
+    // Ticket channel: reflect updates (assignment, status, priority) live so the
+    // header and contact name change without a refresh. Also requires Realtime
+    // replication enabled on `support_tickets`.
+    const ticketChannel = supabase
+      .channel(`ticket-${ticketId}-ticket`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "support_tickets", filter: `id=eq.${ticketId}` },
+        (payload) => {
+          const updated = payload.new as Ticket;
+          setTicket((prev) => (prev ? { ...prev, ...updated } : updated));
+          resolveContactName(updated);
         }
       )
       .subscribe();
@@ -104,9 +148,10 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
       if (typingClearTimerRef.current) clearTimeout(typingClearTimerRef.current);
       channelRef.current = null;
       supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(ticketChannel);
       supabase.removeChannel(typingChannel);
     };
-  }, [ticketId, userId, supabase]);
+  }, [ticketId, userId, userRole, supabase]);
 
   /** Broadcasts that the local user is typing, throttled to avoid spamming the channel. */
   const notifyTyping = useCallback(() => {
@@ -170,6 +215,7 @@ export function useChat(ticketId: string, userId: string, userRole: UserRole) {
 
   return {
     ticket,
+    contactName,
     messages,
     newMessage,
     isLoading,

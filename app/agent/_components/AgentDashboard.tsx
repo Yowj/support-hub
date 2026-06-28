@@ -39,6 +39,7 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
   );
 
   const selectedTicket = tickets.find((t) => t.id === selectedTicketId) ?? null;
+  const hasSelection = !!(selectedTicketId && selectedTicket);
 
   const TABS: FilterTab<AgentFilter>[] = [
     { key: "all", label: "All", count: stats.all },
@@ -50,7 +51,11 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
   return (
     <div className="flex h-full">
       {/* ── Left Sidebar ── */}
-      <DashboardSidebar className="w-[300px] flex-shrink-0 flex flex-col border-r border-border bg-card">
+      <DashboardSidebar
+        className={`w-full md:w-[300px] flex-shrink-0 flex-col border-r border-border bg-card ${
+          hasSelection ? "hidden md:flex" : "flex"
+        }`}
+      >
 
         {/* Sidebar Header */}
         <div className="px-4 pt-4 pb-3 border-b border-border">
@@ -98,7 +103,11 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
       </DashboardSidebar>
 
       {/* ── Right Panel ── */}
-      <DashboardPanel className="flex-1 overflow-hidden flex flex-col bg-background">
+      <DashboardPanel
+        className={`flex-1 overflow-hidden flex-col bg-background ${
+          hasSelection ? "flex" : "hidden md:flex"
+        }`}
+      >
         {selectedTicketId && selectedTicket ? (
           <ChatInterface
             key={selectedTicketId}

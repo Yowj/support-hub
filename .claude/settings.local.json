@@ -16,7 +16,8 @@
       "Bash(find \"$HOME/.agents/skills/nextjs-app-router-patterns\" \"$HOME/.claude/skills/nextjs-app-router-patterns\" -type f 2>/dev/null)",
       "Read(//c/Users/eugen/.agents/skills/nextjs-app-router-patterns/**)",
       "Bash(git rev-parse *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "PowerShell(npx tsc --noEmit)"
     ],
     "deny": [],
     "ask": []

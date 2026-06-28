@@ -15,11 +15,6 @@ interface ChatInterfaceProps {
   className?: string;
 }
 
-const CONTACT_NAME: Record<"customer" | "agent", string> = {
-  customer: "Support Agent",
-  agent: "Customer",
-};
-
 export default function ChatInterface({
   ticketId,
   userId,
@@ -29,6 +24,7 @@ export default function ChatInterface({
 }: ChatInterfaceProps) {
   const {
     ticket,
+    contactName,
     messages,
     newMessage,
     isLoading,
@@ -40,8 +36,6 @@ export default function ChatInterface({
     handleTextareaChange,
     sendMessage,
   } = useChat(ticketId, userId, userRole);
-
-  const contactName = CONTACT_NAME[userRole];
 
   if (isLoading) {
     return (
