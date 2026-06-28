@@ -17,7 +17,10 @@
       "Read(//c/Users/eugen/.agents/skills/nextjs-app-router-patterns/**)",
       "Bash(git rev-parse *)",
       "Bash(npx tsc *)",
-      "PowerShell(npx tsc --noEmit)"
+      "PowerShell(npx tsc --noEmit)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:supabase.com)",
+      "PowerShell(npm install --no-audit --no-fund)"
     ],
     "deny": [],
     "ask": []

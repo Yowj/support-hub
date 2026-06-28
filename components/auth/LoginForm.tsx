@@ -8,14 +8,14 @@ import { useRouter } from "next/navigation";
 import AuthInput from "@/components/shared/AuthInput";
 import OAuthButtons from "@/components/shared/OAuthButtons";
 
-export default function LoginForm() {
+export default function LoginForm({ initialError = "" }: { initialError?: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(initialError);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
