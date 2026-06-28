@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { MessageCircle } from "lucide-react";
 import type { Message } from "@/types/ticket";
-import { groupMessagesByDate } from "@/lib/tickets/group-messages";
+import { buildChatRows } from "@/lib/tickets/group-messages";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 
@@ -25,7 +25,7 @@ export default function MessageList({
   }, [messages, isOtherTyping]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+    <div className="flex-1 overflow-y-auto px-4 py-4">
       {messages.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full text-center py-12">
           <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4">
@@ -38,27 +38,22 @@ export default function MessageList({
           </p>
         </div>
       ) : (
-        groupMessagesByDate(messages).map((group) => (
-          <div key={group.date} className="space-y-1">
-            {/* Date separator */}
-            <div className="flex items-center gap-3 py-3">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground font-medium px-3 py-1 bg-card rounded-full border border-border whitespace-nowrap">
-                {group.date}
-              </span>
-              <div className="flex-1 h-px bg-border" />
+        buildChatRows(messages).map((row) =>
+          row.kind === "separator" ? (
+            <div key={row.id} className="flex justify-center py-4">
+              <span className="text-xs font-medium text-muted-foreground">{row.label}</span>
             </div>
-
-            {group.messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                isMine={message.sender_id === userId}
-                contactName={contactName}
-              />
-            ))}
-          </div>
-        ))
+          ) : (
+            <MessageBubble
+              key={row.message.id}
+              message={row.message}
+              isMine={row.message.sender_id === userId}
+              contactName={contactName}
+              isFirstInRun={row.isFirstInRun}
+              isLastInRun={row.isLastInRun}
+            />
+          )
+        )
       )}
       {isOtherTyping && <TypingIndicator contactName={contactName} />}
       <div ref={endRef} />

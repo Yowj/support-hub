@@ -39,20 +39,37 @@ export function getRelativeTime(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
-/** Clock time (e.g. "3:04 PM") for a chat message timestamp. */
+/** Clock time (e.g. "3:04 PM") shown on hover over a chat message. */
 export function formatTime(timestamp: string): string {
-  return new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
-/** "Today" / "Yesterday" / dated label for chat date separators. */
-export function formatDate(timestamp: string): string {
+/** Centered separator label shown when a conversation starts or resumes after
+ *  a gap. Messenger-style: just the time for today, weekday + time within the
+ *  past week, and a dated label for anything older. */
+export function formatSeparator(timestamp: string): string {
   const date = new Date(timestamp);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  if (date.toDateString() === today.toDateString()) return "Today";
-  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
-  return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+  const now = new Date();
+  const time = formatTime(timestamp);
+
+  if (date.toDateString() === now.toDateString()) return time;
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (date.toDateString() === yesterday.toDateString()) return `Yesterday ${time}`;
+
+  const weekAgo = new Date(now);
+  weekAgo.setDate(now.getDate() - 7);
+  if (date > weekAgo) {
+    return `${date.toLocaleDateString([], { weekday: "short" })} ${time}`;
+  }
+
+  const datePart = date.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: date.getFullYear() === now.getFullYear() ? undefined : "numeric",
+  });
+  return `${datePart}, ${time}`;
 }
 
 /** Border + background classes for the status badge in the chat header. */

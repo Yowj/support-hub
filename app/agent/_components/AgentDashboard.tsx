@@ -13,7 +13,7 @@ import { TicketListSkeleton, TicketListEmpty } from "@/components/shared/TicketL
 import { DashboardSidebar, DashboardPanel } from "@/components/shared/DashboardShell";
 
 interface AgentDashboardProps {
-  user: { id: string; email?: string };
+  user: { id: string; email?: string, displayName?: string };
 }
 
 export default function AgentDashboard({ user }: AgentDashboardProps) {
@@ -29,7 +29,7 @@ export default function AgentDashboard({ user }: AgentDashboardProps) {
     updatingTicketId,
     assignTicket,
     updateTicketStatus,
-  } = useAgentTickets(user, filter);
+  } = useAgentTickets(user, filter, user.displayName);
 
   const filteredTickets = tickets.filter(
     (t) =>

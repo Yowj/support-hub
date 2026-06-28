@@ -18,7 +18,7 @@ interface AgentUser {
   email?: string;
 }
 
-export function useAgentTickets(user: AgentUser, filter: AgentFilter) {
+export function useAgentTickets(user: AgentUser, filter: AgentFilter, displayName: string) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState<AgentStats>({ all: 0, unassigned: 0, mine: 0, assigned: 0 });
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +89,7 @@ export function useAgentTickets(user: AgentUser, filter: AgentFilter) {
   const assignTicket = async (ticketId: string) => {
     setAssigningTicketId(ticketId);
     try {
-      await assignTicketQuery(supabase, ticketId, user);
+      await assignTicketQuery(supabase, ticketId, user, displayName);
       await Promise.all([syncTickets(), refreshStats()]);
     } catch (error) {
       console.error("Error assigning ticket:", error);

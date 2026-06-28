@@ -11,14 +11,8 @@ export interface AgentStats {
 }
 
 // function for getting agent stats and tickets
-export async function fetchAgentStats(
-  supabase: SupabaseClient,
-  userId: string
-): Promise<AgentStats | null> {
-  const { data } = await supabase
-    .from("support_tickets")
-    .select("agent_id")
-    .neq("status", "closed");
+export async function fetchAgentStats(supabase: SupabaseClient, userId: string): Promise<AgentStats | null> {
+  const { data } = await supabase.from("support_tickets").select("agent_id").neq("status", "closed");
   if (!data) return null;
   return {
     all: data.length,
@@ -32,7 +26,7 @@ export async function fetchAgentStats(
 export async function fetchAgentTickets(
   supabase: SupabaseClient,
   filter: AgentFilter,
-  userId: string
+  userId: string,
 ): Promise<Ticket[]> {
   let query = supabase
     .from("support_tickets")
@@ -42,7 +36,7 @@ export async function fetchAgentTickets(
         id,
         display_name,
         avatar_url
-      )`
+      )`,
     )
     .neq("status", "closed")
     .order("created_at", { ascending: false });
@@ -83,7 +77,8 @@ export async function fetchAgentTickets(
 export async function assignTicket(
   supabase: SupabaseClient,
   ticketId: string,
-  agent: { id: string; email?: string }
+  agent: { id: string; email?: string },
+  displayName: string,
 ): Promise<void> {
   const { error: updateError } = await supabase
     .from("support_tickets")
@@ -91,13 +86,12 @@ export async function assignTicket(
     .eq("id", ticketId);
   if (updateError) throw updateError;
 
-  const agentLabel = agent.email || "A support agent";
   await supabase.from("chat_messages").insert([
     {
       ticket_id: ticketId,
       sender_id: agent.id,
       sender_type: "system",
-      message: `${agentLabel} has been assigned to this ticket.`,
+      message: `${displayName} has been assigned to this ticket.`,
     },
   ]);
 }
@@ -107,12 +101,9 @@ export async function updateTicketStatus(
   supabase: SupabaseClient,
   ticketId: string,
   status: string,
-  agentId: string
+  agentId: string,
 ): Promise<void> {
-  const { error: updateError } = await supabase
-    .from("support_tickets")
-    .update({ status })
-    .eq("id", ticketId);
+  const { error: updateError } = await supabase.from("support_tickets").update({ status }).eq("id", ticketId);
   if (updateError) throw updateError;
 
   await supabase.from("chat_messages").insert([

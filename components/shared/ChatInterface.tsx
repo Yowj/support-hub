@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useChat } from "@/components/shared/chat/use-chat";
 import ChatHeader from "@/components/shared/chat/ChatHeader";
+import WaitingForAgent from "@/components/shared/chat/WaitingForAgent";
 import MessageList from "@/components/shared/chat/MessageList";
 import ChatInput from "@/components/shared/chat/ChatInput";
 
@@ -67,6 +68,11 @@ export default function ChatInterface({
     );
   }
 
+  // No agent assigned yet: from the customer's side there's no one on the other
+  // end to show, so we drop the ChatHeader and surface an animated waiting state.
+  const isWaitingForAgent =
+    userRole === "customer" && !ticket?.agent_id && ticket?.status !== "closed";
+
   return (
     <div
       className={
@@ -74,7 +80,11 @@ export default function ChatInterface({
         "flex flex-col h-[calc(100vh-90px)] bg-muted rounded-xl overflow-hidden border border-border shadow-sm"
       }
     >
-      <ChatHeader contactName={contactName} ticket={ticket} onClose={onClose} />
+      {isWaitingForAgent ? (
+        <WaitingForAgent onClose={onClose} waitingSince={ticket!.created_at} />
+      ) : (
+        <ChatHeader contactName={contactName} ticket={ticket} onClose={onClose} />
+      )}
 
       <MessageList
         messages={messages}
