@@ -3,7 +3,7 @@ import type { User } from "@supabase/supabase-js";
 export interface UserProfile {
   id: string;
   role: "customer" | "agent" | "admin";
-  display_name: string | null;
+  display_name: string;
   avatar_url: string | null;
   onboarded: boolean;
 }

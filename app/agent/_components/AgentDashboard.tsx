@@ -13,7 +13,7 @@ import { TicketListSkeleton, TicketListEmpty } from "@/components/shared/TicketL
 import { DashboardSidebar, DashboardPanel } from "@/components/shared/DashboardShell";
 
 interface AgentDashboardProps {
-  user: { id: string; email?: string, displayName?: string };
+  user: { id: string; email?: string, displayName: string };
 }
 
 export default function AgentDashboard({ user }: AgentDashboardProps) {
